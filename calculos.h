@@ -1,3 +1,6 @@
+#ifndef CALCULOS_H
+#define CALCULOS_H
+
 #include <iostream>
 #include <fstream>
 
@@ -113,3 +116,5 @@ float aceleracao(float tempoDeExecucaoOld, float tempoDeExecucaoNew) {
 	float aceleracao = tempoDeExecucaoOld / tempoDeExecucaoNew;
 	return aceleracao;
 }
+
+#endif // CALCULOS_H

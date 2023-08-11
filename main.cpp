@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
-#include <calculos.h>
+#include "calculos.h"
 
 using namespace std;
 
@@ -92,9 +92,25 @@ vector<LinhaASM> lerArquivo(ifstream &arquivo){
     return instrucoes;
 }
 
+// Retorna uma organizacao conforme
+// entrada do usuário
+Organizacao criarOrganizacao(string nome){
+    Organizacao resultado;
+    cout << "Forneca o clock da organizacao " << nome << ": ";
+    cin >> resultado.clock;
+
+    for (auto const& [key, value]: resultado.quantCiclos){
+        cout << "Forneca a quantidade de ciclos para instrucoes tipo " << key << ": ";
+        cin >> resultado.quantCiclos[key];
+    }
+    cout << endl << endl;
+    return resultado;
+}
+
 int main(){
-    Organizacao orgA;
-    cout << orgA.quantCiclos["S"] << endl;
+    Organizacao orgA = criarOrganizacao("A");
+    Organizacao orgB = criarOrganizacao("B");
+    
 
     ifstream progA;
     abrirArquivo(progA, "binary_dump");
