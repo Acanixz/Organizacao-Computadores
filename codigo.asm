@@ -1,3 +1,13 @@
-addi t0, t0, 2
-addi t1, t1, 1
-add t2, t0, t1
+################################
+.text 
+
+	addi s0, zero, 5
+	addi s1, zero, 10
+	
+for:
+	beq  t0, s0, fim
+	add  s1, s1, t0
+	addi t0, t0, 1
+	jal  zero, for
+fim:
+################################
