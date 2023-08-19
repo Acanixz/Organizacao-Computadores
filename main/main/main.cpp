@@ -67,8 +67,11 @@ string lerOpcode(string opcode) {
     if (opcode == "1100011")
         return "B";
 
-    if (opcode == "1100111" || opcode == "0000011" || opcode == "0010011")
-        return "I";
+    if (opcode == "1100111" || opcode == "0010011" || opcode == "0001111" || opcode == "1110011")
+        return "I_ar";
+
+    if (opcode == "0000011")
+        return "I_lo";
 
     if (opcode == "0110011")
         return "R";
@@ -130,7 +133,7 @@ vector<LinhaASM> lerArquivo(ifstream& arquivo) {
 Organizacao criarOrganizacao(string nome) {
     cout << "----------------------\n ORGANIZACAO " << nome << endl;
     Organizacao resultado;
-    cout << "Forneca o clock da organizacao " << nome << ": ";
+    cout << "Forneca o tempo de clock da organizacao " << nome << ": ";
     cin >> resultado.clock;
 
     for (auto const& [key, value] : resultado.quantCiclos) {
@@ -152,8 +155,23 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
         {"I_lo", 0.f},
         {"R", 0.f},
         {"S", 0.f},
+        {"?", 0.f}
     };
-    // TODO: for loop de vector<LinhaASM> p/ somar valores
+
+    for (int i = 0; i < programa.size(); i++) {
+        somaCiclos[programa[i].tipoInstrucao] += 1;
+        resultado.CiclosTotais += organizacao.quantCiclos[programa[i].tipoInstrucao];
+    }
+    
+    for (auto const& [key, value] : somaCiclos) {
+        cout << key << ": " << value << endl;
+    }
+
+    cout << "TOTAL CICLOS: " << resultado.CiclosTotais << endl;
+
+    // TODO: Gerar CPI
+    //float ciclosCPU = ???
+    //resultado.CPI = ciclosPorInstrucao(programa.size(), ciclosCPU);
     return resultado;
 }
 
@@ -179,5 +197,6 @@ int main() {
             << endl << endl;
     }
 
+    calcularResultados(instrucoes, orgA);
     return 0;
 }

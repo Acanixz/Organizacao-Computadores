@@ -9,12 +9,12 @@ using namespace std;
 
 //Para melhorar o desempenho da CPU
 //Reduzir o numero de ciclos para a execu??o do programa ou
-//Reduzir o tempo do ciclo de clock(per�odo do clock), ou 
+//Reduzir o tempo do ciclo de clock(periodo do clock), ou 
 //seja, aumentar a frequ?ncia do clock
 
-// Calcula o tempo/frequencia do clock
-float clock(float tempo) {
-	float clock = 1 / tempo;
+// Calcula o frequencia do clock
+float freqClock(float tempoClock) {
+	float clock = 1 / tempoClock;
 	return clock;
 }
 
@@ -29,15 +29,15 @@ float instrucoes(float ciclosPorInstrucao, float ciclosDaCPU) {
 // ------ REVISAR ------
 // Calcula a quantidade de ciclos por instrucao
 // CPI = CCPU / I
-float ciclosPorInstrucao(float instrucoes, float ciclosDaCPU) {
-	float ciclosPorInstrucao = ciclosDaCPU / instrucoes;
+float ciclosPorInstrucao(float quantInstrucoes, float ciclosDaCPU) {
+	float ciclosPorInstrucao = ciclosDaCPU / quantInstrucoes;
 	return ciclosPorInstrucao;
 }
 
 // Calcula os ciclos da CPU a partir das qtde de instrucoes e da CPI
 // CCPU = I * CPI
-float ciclosDaCPU(float instrucoes, float ciclosPorInstrucao) {
-	float ciclosDaCPU = instrucoes * ciclosPorInstrucao;
+float ciclosDaCPU(float quantInstrucoes, float ciclosPorInstrucao) {
+	float ciclosDaCPU = quantInstrucoes * ciclosPorInstrucao;
 	return ciclosDaCPU;
 }
 
@@ -62,8 +62,8 @@ float desempenhoComparativo(float tempoDeExecucaoCPUX, float tempoDeExecucaoCPUY
 //**							**// 
 // Calcula o tempo de execu??o da CPU a partir de instrucoes, ciclos e clock
 // TCPU = I * CPI * Tclock
-float tempoDeExecucaoCPU(float instrucoes, float ciclosCPU, float tempoClock) {
-	float tempoDeExecucaoCPU = instrucoes * ciclosCPU * tempoClock;
+float tempoDeExecucaoCPU(float quantInstrucoes, float ciclosCPU, float tempoClock) {
+	float tempoDeExecucaoCPU = quantInstrucoes * ciclosCPU * tempoClock;
 	return tempoDeExecucaoCPU;
 }
 
