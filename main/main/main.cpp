@@ -169,9 +169,7 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
 
     cout << "TOTAL CICLOS: " << resultado.CiclosTotais << endl;
 
-    // TODO: Gerar CPI
-    //float ciclosCPU = ???
-    //resultado.CPI = ciclosPorInstrucao(programa.size(), ciclosCPU);
+    resultado.CPI = (resultado.CiclosTotais / programa.size());
     return resultado;
 }
 
