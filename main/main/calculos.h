@@ -12,29 +12,29 @@ float gerarDesempenho(float tempoExecucao) {
 	return 1.0 / tempoExecucao;
 }
 
-// Cout dos dois métodos de comparação de desempenho
+// Cout dos dois mÖtodos de comparaãáo de desempenho
 void responderDesempenho(float resultado) {
-	cout << "RESULTADO: " << resultado << endl;
+	cout << "----------------------" << endl;
+	cout << "RESULTADO DA COMPARACAO: " << resultado << endl;
 	float porcentagem1 = (resultado - 1) * 100;
-
-	float porcentagem2 = 100 - porcentagem1;
-	float porcentagem3 = 100 + porcentagem1;
+	float porcentagem2 = resultado * 100;
 	if (resultado > 1) {
-		cout << "Arquitetura X possui " << porcentagem1 << "% a mais de desempenho do que Arquitetura B" << endl;
-		cout << "Enquanto a arquitetura B possui apenas " << porcentagem2 << "% do desempenho da arquitetura A" << endl;
+		cout << "Arquitetura A possui " << (resultado-1) <<  "X (" << porcentagem1 << "%) a mais de desempenho do que Arquitetura B" << endl;
+		cout << "Enquanto a arquitetura B eh " << (resultado - 1) << "X (" << porcentagem1 << "%) mais lenta" << endl;
 		return;
 	}
 	if (resultado < 1) {
-		cout << "Arquitetura X possui apenas " << porcentagem3 << "% do desempenho da Arquitetura B" << endl;
-		cout << "Enquanto a arquitetura B possui " << -porcentagem1 << "% a mais de desempenho do que arquitetura A" << endl;
+		cout << "Arquitetura A possui apenas " << resultado << "X (" << porcentagem2 << "%) do desempenho da Arquitetura B" << endl;
+		cout << "Enquanto a arquitetura B possui " << (1-resultado) << "X (" << -porcentagem1 << "%) a mais de desempenho do que arquitetura A" << endl;
 		return;
 	}
 
-	cout << "Arquitetura X e Y possuem o mesmo desempenho para este programa!" << endl;
+	cout << "Arquitetura A e B possuem o mesmo desempenho para este programa!" << endl;
+	cout << "----------------------" << endl << endl;
 	return;
 }
 
-// Comparação de desempenho por desempenho
+// Comparaãáo de desempenho por desempenho
 // Formula = desempenhoX / desempenhoY
 float compararDesempenhoPorDesempenho(float desempenhoX, float desempenhoY) {
 	float resultado = desempenhoX / desempenhoY;
@@ -42,7 +42,7 @@ float compararDesempenhoPorDesempenho(float desempenhoX, float desempenhoY) {
 	return resultado;
 }
 
-// Comparação de desempenho por tempo de execução
+// Comparaãáo de desempenho por tempo de execuãáo
 // Formula = tempoExecY / tempoExecX
 float compararDesempenhoPorTempoExec(float tempoExecucaoX, float tempoExecucaoY) {
 	float resultado = tempoExecucaoY / tempoExecucaoX;
@@ -56,39 +56,38 @@ float gerarCiclosCPU(int quantInstrucoes, float CPI) {
 	return quantInstrucoes * CPI;
 }
 
-// Tempo de execução da CPU por tempo de clock
+// Tempo de execuãáo da CPU por tempo de clock
 // Formula = QuantInstrucoes * CPI * TempoClock
 // OBS: CiclosCPU = QuantInstrucoes * CPI
 float TExecCPUPorTempoClock(int quantInstrucoes, float CPI, float tempoClock) {
 	return quantInstrucoes * CPI * tempoClock;
 }
 
-// Tempo de execução da CPU por frequencia de clock
+// Tempo de execuãáo da CPU por frequencia de clock
 // Formula = (quantInstrucoes * CPI) / FreqClock
 // OBS: CiclosCPU = QuantInstrucoes * CPI
 float TExecCPUPorFreqClock(int quantInstrucoes, float CPI, float freqClock) {
 	return (quantInstrucoes * CPI) / freqClock;
 }
 
-/* Taxa de execução das instruções
-* ainda não utilizado, então vamos deixar aqui pra caso a M2 precise
-* É MUITA FORMULA AAAAA
-float taxaExecInstrucoes() {
-
+// Taxa de execuãáo das instruãèes
+// Formula = I / TExecCPU
+float taxaExecInstrucoes(int quantInstrucoes, float TExecCPU) {
+	return quantInstrucoes / TExecCPU;
 }
-*/
 
-// Ciclos-Por-Instrução
+// Ciclos-Por-Instruãáo
 // Formula = CiclosCPU / quantInstrucoes
-// EXPERIMENTAL, TALVEZ NÃO ESTEJA CERTO
-// (variação da formula de ciclosCPU)
+// EXPERIMENTAL, TALVEZ N?O ESTEJA CERTO
+// (variaãáo da formula de ciclosCPU)
 float gerarCPI(float ciclosCPU, int quantInstrucoes) {
 	return ciclosCPU / quantInstrucoes;
 }
 
 /*
-* também ainda não utilizado
-float TMedioExecucao(){
+* Náo hà porque gerar o tempo mÖdio ainda
+* pois hà apenas um programa, s× pegar o T
+float gerarTMedioExecucao(){
 
 }
 */

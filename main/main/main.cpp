@@ -25,8 +25,10 @@ struct LinhaASM {
 
 // Uma organização, utilizado para gerar estatisticas com um vetor de LinhaASM
 struct Organizacao {
-    float clock;
+    float TClock; // Tempo de clock
+    float freqClock; // Frequencia de clock (1/TClock)
     map<string, float> quantCiclos; // Quantos ciclos leva cada instrução?
+
 
     Organizacao() {
         quantCiclos["U"] = 1.f;
@@ -43,7 +45,7 @@ struct Organizacao {
 struct Resultados {
     float CiclosTotais; // Ciclos totais gastos
     float CPI; // Ciclos por instrução
-    float Texec; // Tempo de execução (Quant. instrucoes * CPI * Clock)
+    float TExec; // Tempo de execução da CPU (Quant. instrucoes * CPI * Clock)
 };
 
 // Abre o arquivo, redundante, mas quem sabe
@@ -134,7 +136,8 @@ Organizacao criarOrganizacao(string nome) {
     cout << "----------------------\n ORGANIZACAO " << nome << endl;
     Organizacao resultado;
     cout << "Forneca o tempo de clock da organizacao " << nome << ": ";
-    cin >> resultado.clock;
+    cin >> resultado.TClock;
+    resultado.freqClock = (1 / resultado.TClock);
 
     for (auto const& [key, value] : resultado.quantCiclos) {
         cout << "Forneca a quantidade de ciclos para instrucoes tipo " << key << ": ";
@@ -163,25 +166,28 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
         resultado.CiclosTotais += organizacao.quantCiclos[programa[i].tipoInstrucao];
     }
     
+    /*
+    * Debug das buscas por cada tipo
     for (auto const& [key, value] : somaCiclos) {
         cout << key << ": " << value << endl;
     }
-
-    cout << "TOTAL CICLOS: " << resultado.CiclosTotais << endl;
+    */
 
     resultado.CPI = (resultado.CiclosTotais / programa.size());
+    resultado.TExec = TExecCPUPorFreqClock(programa.size(), resultado.CPI, organizacao.freqClock);
     return resultado;
 }
 
 int main() {
-    // Temporariamente comentado
     Organizacao orgA = criarOrganizacao("A");
-    //Organizacao orgB = criarOrganizacao("B");
+    Organizacao orgB = criarOrganizacao("B");
 
     ifstream progA;
     abrirArquivo(progA, "binary_dump");
     vector<LinhaASM> instrucoes = lerArquivo(progA);
 
+    /*
+    * Debug das informações gerais
     for (int i = 0; i < instrucoes.size(); i++) {
         cout << "INSTRUCAO " << i + 1 << " completa: " << instrucoes[i].instrucao << endl;
         cout << "TIPO DE INSTRUCAO: " << instrucoes[i].tipoInstrucao << endl;
@@ -194,7 +200,18 @@ int main() {
             << instrucoes[i].opcode
             << endl << endl;
     }
+    */
 
-    calcularResultados(instrucoes, orgA);
+    Resultados resultadoA = calcularResultados(instrucoes, orgA);
+    cout << "RESULTADOS DA ORGANIZACAO A: " << endl;
+    cout << "TOTAL DE CICLOS: " << resultadoA.CiclosTotais << endl;
+    cout << "CPI (Ciclos por Instrucao): " << resultadoA.CPI << endl;
+    cout << "Tempo de execucao: " << resultadoA.TExec << endl;
+    Resultados resultadoB = calcularResultados(instrucoes, orgB);
+    cout << "RESULTADOS DA ORGANIZACAO B: " << endl;
+    cout << "TOTAL DE CICLOS: " << resultadoB.CiclosTotais << endl;
+    cout << "CPI (Ciclos por Instrucao): " << resultadoB.CPI << endl;
+    cout << "Tempo de execucao: " << resultadoB.TExec << endl;
+    compararDesempenhoPorTempoExec(resultadoA.TExec, resultadoB.TExec);
     return 0;
 }
