@@ -1,3 +1,13 @@
+/*
+* Disciplina: Organização de Computadores
+* Atividade : Avaliação 01
+* 
+* Grupo:
+* - Cassiano de Sena Crispim
+* - Hérick Vitor Vieira Bittencourt
+* - Eduardo Miguel Fuchs Perez
+*/
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -6,12 +16,13 @@
 #include "calculos.h"
 using namespace std;
 
-// Armazena informaÃ§Ãµes geradas pelo binary dump
+
+// Armazena informações geradas pelo binary dump
 struct LinhaASM {
-    // InstruÃ§Ã£o completa (32 bits)
+    // Instrução completa (32 bits)
     string instrucao;
 
-    // Substrings da instruÃ§Ã£o completa
+    // Substrings da instrução completa
     string opcode;
     string rd;
     string funct3;
@@ -23,29 +34,29 @@ struct LinhaASM {
     string tipoInstrucao;
 };
 
-// Uma organizaÃ§Ã£o, utilizado para gerar estatisticas com um vetor de LinhaASM
+// Uma organização, utilizado para gerar estatisticas com um vetor de LinhaASM
 struct Organizacao {
     float TClock; // Tempo de clock
     float freqClock; // Frequencia de clock (1/TClock)
-    map<string, float> quantCiclos; // Quantos ciclos leva cada instruÃ§Ã£o?
+    map<string, float> quantCiclos; // Quantos ciclos leva cada instrução?
 
 
     Organizacao() {
         quantCiclos["U"] = 1.f;
         quantCiclos["J"] = 1.f;
         quantCiclos["B"] = 1.f;
-        quantCiclos["I_ar"] = 1.f; // Quant. Ciclos p/ instruÃ§Ã£o Imm. Aritmetico e ecall
-        quantCiclos["I_lo"] = 1.f; // Quant. Ciclos p/ instruÃ§Ã£o Imm. Load
+        quantCiclos["I_ar"] = 1.f; // Quant. Ciclos p/ instrução Imm. Aritmetico e ecall
+        quantCiclos["I_lo"] = 1.f; // Quant. Ciclos p/ instrução Imm. Load
         quantCiclos["R"] = 1.f;
         quantCiclos["S"] = 1.f;
     }
 };
 
-// Resultados de desempenho da organizaÃ§Ã£o com um binary dump
+// Resultados de desempenho da organização com um binary dump
 struct Resultados {
     float CiclosTotais; // Ciclos totais gastos
-    float CPI; // Ciclos por instruÃ§Ã£o
-    float TExec; // Tempo de execuÃ§Ã£o da CPU (Quant. instrucoes * CPI * Clock)
+    float CPI; // Ciclos por instrução
+    float TExec; // Tempo de execução da CPU (Quant. instrucoes * CPI * Clock)
 };
 
 // Abre o arquivo, redundante, mas quem sabe
@@ -86,7 +97,7 @@ string lerOpcode(string opcode) {
 }
 
 // Recebe um ifstream para ler e gera um vetor
-// cada indice do vetor representa uma instruÃ§Ã£o de 32 bits
+// cada indice do vetor representa uma instrução de 32 bits
 vector<LinhaASM> lerArquivo(ifstream& arquivo) {
     vector<LinhaASM> instrucoes;
 
@@ -102,18 +113,18 @@ vector<LinhaASM> lerArquivo(ifstream& arquivo) {
 
         if (linhaAtual.instrucao.size() != 32) {
             if (arquivo.good()) {
-                // alguma linha nÃ£o estÃ¡ certa
+                // alguma linha não está certa
                 throw std::runtime_error("Nao foi possivel ler a linha " + to_string(i) + ", verifique o arquivo.");
             }
             else {
-                // newline final, sÃ³ ignorar
+                // newline final, só ignorar
                 continue;
             }
         }
 
-        // obs: a ordem dos numeros Ã© o inverso do site
+        // obs: a ordem dos numeros são o inverso do site
         // https://jemu.oscc.cc/ADD
-        // (site vai da direita pra esquerda, aqui Ã© esq. pra dir.)
+        // (site vai da direita pra esquerda, aqui é esq. pra dir.)
         linhaAtual.opcode = linhaAtual.instrucao.substr(25, 7);
         linhaAtual.rd = linhaAtual.instrucao.substr(20, 5);
         linhaAtual.funct3 = linhaAtual.instrucao.substr(17, 3);
@@ -131,7 +142,7 @@ vector<LinhaASM> lerArquivo(ifstream& arquivo) {
 }
 
 // Retorna uma organizacao conforme
-// entrada do usuÃ¡rio
+// entrada do usuário
 Organizacao criarOrganizacao(string nome) {
     cout << "----------------------\n ORGANIZACAO " << nome << endl;
     Organizacao resultado;
@@ -187,7 +198,7 @@ int main() {
     vector<LinhaASM> instrucoes = lerArquivo(progA);
 
     /*
-    * Debug das informaÃ§Ãµes gerais
+    * Debug das informações gerais
     for (int i = 0; i < instrucoes.size(); i++) {
         cout << "INSTRUCAO " << i + 1 << " completa: " << instrucoes[i].instrucao << endl;
         cout << "TIPO DE INSTRUCAO: " << instrucoes[i].tipoInstrucao << endl;

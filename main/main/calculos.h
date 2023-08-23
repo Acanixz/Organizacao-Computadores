@@ -12,7 +12,7 @@ float gerarDesempenho(float tempoExecucao) {
 	return 1.0 / tempoExecucao;
 }
 
-// Cout dos dois mÖtodos de comparaãáo de desempenho
+// Cout dos dois métodos de comparação de desempenho
 void responderDesempenho(float resultado) {
 	cout << "----------------------" << endl;
 	cout << "RESULTADO DA COMPARACAO: " << resultado << endl;
@@ -34,7 +34,7 @@ void responderDesempenho(float resultado) {
 	return;
 }
 
-// Comparaãáo de desempenho por desempenho
+// Comparação de desempenho por desempenho
 // Formula = desempenhoX / desempenhoY
 float compararDesempenhoPorDesempenho(float desempenhoX, float desempenhoY) {
 	float resultado = desempenhoX / desempenhoY;
@@ -42,7 +42,7 @@ float compararDesempenhoPorDesempenho(float desempenhoX, float desempenhoY) {
 	return resultado;
 }
 
-// Comparaãáo de desempenho por tempo de execuãáo
+// Comparação de desempenho por tempo de execução
 // Formula = tempoExecY / tempoExecX
 float compararDesempenhoPorTempoExec(float tempoExecucaoX, float tempoExecucaoY) {
 	float resultado = tempoExecucaoY / tempoExecucaoX;
@@ -56,37 +56,37 @@ float gerarCiclosCPU(int quantInstrucoes, float CPI) {
 	return quantInstrucoes * CPI;
 }
 
-// Tempo de execuãáo da CPU por tempo de clock
+// Tempo de execução da CPU por tempo de clock
 // Formula = QuantInstrucoes * CPI * TempoClock
 // OBS: CiclosCPU = QuantInstrucoes * CPI
 float TExecCPUPorTempoClock(int quantInstrucoes, float CPI, float tempoClock) {
 	return quantInstrucoes * CPI * tempoClock;
 }
 
-// Tempo de execuãáo da CPU por frequencia de clock
+// Tempo de execução da CPU por frequencia de clock
 // Formula = (quantInstrucoes * CPI) / FreqClock
 // OBS: CiclosCPU = QuantInstrucoes * CPI
 float TExecCPUPorFreqClock(int quantInstrucoes, float CPI, float freqClock) {
 	return (quantInstrucoes * CPI) / freqClock;
 }
 
-// Taxa de execuãáo das instruãèes
+// Taxa de execução das instruções
 // Formula = I / TExecCPU
 float taxaExecInstrucoes(int quantInstrucoes, float TExecCPU) {
 	return quantInstrucoes / TExecCPU;
 }
 
-// Ciclos-Por-Instruãáo
+// Ciclos-Por-Instrução
 // Formula = CiclosCPU / quantInstrucoes
-// EXPERIMENTAL, TALVEZ N?O ESTEJA CERTO
-// (variaãáo da formula de ciclosCPU)
+// EXPERIMENTAL, TALVEZ NÃO ESTEJA CERTO
+// (variação da formula de ciclosCPU)
 float gerarCPI(float ciclosCPU, int quantInstrucoes) {
 	return ciclosCPU / quantInstrucoes;
 }
 
 /*
-* Náo hà porque gerar o tempo mÖdio ainda
-* pois hà apenas um programa, s× pegar o T
+* Náo há porque gerar o tempo médio ainda
+* pois há apenas um programa, só pegar o TExecCPU
 float gerarTMedioExecucao(){
 
 }
