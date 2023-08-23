@@ -1,3 +1,18 @@
+/*
+* Disciplina: Organização de Computadores
+* Atividade : Avaliação 01
+*
+* Grupo:
+* - Cassiano de Sena Crispim
+* - Hérick Vitor Vieira Bittencourt
+* - Eduardo Miguel Fuchs Perez
+*
+* OBSERVAÇÃO:
+* - Devido o uso de for loops com lógica [key, value], o padrão ISO para
+* este projeto deve ser o C++ 17, caso contrário a build irá falhar
+* (vá na aba projeto->propriedades de main no visual studio 2019)
+*/
+
 #ifndef CALCULOS_H
 #define CALCULOS_H
 

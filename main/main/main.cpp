@@ -6,6 +6,11 @@
 * - Cassiano de Sena Crispim
 * - Hérick Vitor Vieira Bittencourt
 * - Eduardo Miguel Fuchs Perez
+* 
+* OBSERVAÇÃO:
+* - Devido o uso de for loops com lógica [key, value], o padrão ISO para
+* este projeto deve ser o C++ 17, caso contrário a build irá falhar
+* (vá na aba projeto->propriedades de main no visual studio 2019)
 */
 
 #include <iostream>
@@ -190,39 +195,85 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
 }
 
 int main() {
-    Organizacao orgA = criarOrganizacao("A");
-    Organizacao orgB = criarOrganizacao("B");
+    bool finalizado = false;
+    bool semOrganizacao = true;
+    Organizacao orgA;
+    Organizacao orgB;
+    while (!finalizado) {
+        system("cls");
 
-    ifstream progA;
-    abrirArquivo(progA, "binary_dump");
-    vector<LinhaASM> instrucoes = lerArquivo(progA);
+        // Cria as organizações se elas não existem ou usuario quer refazer
+        if (semOrganizacao) {
+            cout << "Criando organizacoes: " << endl;
+            semOrganizacao = false;
+            orgA = criarOrganizacao("A");
+            orgB = criarOrganizacao("B");
+        }
 
-    /*
-    * Debug das informações gerais
-    for (int i = 0; i < instrucoes.size(); i++) {
-        cout << "INSTRUCAO " << i + 1 << " completa: " << instrucoes[i].instrucao << endl;
-        cout << "TIPO DE INSTRUCAO: " << instrucoes[i].tipoInstrucao << endl;
-        cout << "INSTRUCAO " << i + 1 << " separada: "
-            << instrucoes[i].funct7 << " "
-            << instrucoes[i].rs2 << " "
-            << instrucoes[i].rs1 << " "
-            << instrucoes[i].funct3 << " "
-            << instrucoes[i].rd << " "
-            << instrucoes[i].opcode
-            << endl << endl;
+        string nomeFornecido = "";
+        cout << "Forneca o nome/caminho do arquivo contendo as instrucoes: " << endl;
+        cin >> nomeFornecido;
+        cout << endl << endl;
+
+        ifstream programa;
+        abrirArquivo(programa, nomeFornecido);
+        vector<LinhaASM> instrucoes = lerArquivo(programa);
+
+        /*
+        * Debug das informações gerais
+        for (int i = 0; i < instrucoes.size(); i++) {
+            cout << "INSTRUCAO " << i + 1 << " completa: " << instrucoes[i].instrucao << endl;
+            cout << "TIPO DE INSTRUCAO: " << instrucoes[i].tipoInstrucao << endl;
+            cout << "INSTRUCAO " << i + 1 << " separada: "
+                << instrucoes[i].funct7 << " "
+                << instrucoes[i].rs2 << " "
+                << instrucoes[i].rs1 << " "
+                << instrucoes[i].funct3 << " "
+                << instrucoes[i].rd << " "
+                << instrucoes[i].opcode
+                << endl << endl;
+        }
+        */
+
+        Resultados resultadoA = calcularResultados(instrucoes, orgA);
+        cout << "RESULTADOS DA ORGANIZACAO A: " << endl;
+        cout << "TOTAL DE CICLOS: " << resultadoA.CiclosTotais << endl;
+        cout << "CPI (Ciclos por Instrucao): " << resultadoA.CPI << endl;
+        cout << "Tempo de execucao: " << resultadoA.TExec << endl;
+        
+        cout << "----------------------" << endl;
+
+        Resultados resultadoB = calcularResultados(instrucoes, orgB);
+        cout << "RESULTADOS DA ORGANIZACAO B: " << endl;
+        cout << "TOTAL DE CICLOS: " << resultadoB.CiclosTotais << endl;
+        cout << "CPI (Ciclos por Instrucao): " << resultadoB.CPI << endl;
+        cout << "Tempo de execucao: " << resultadoB.TExec << endl;
+
+        compararDesempenhoPorTempoExec(resultadoA.TExec, resultadoB.TExec);
+
+        int escolha = 0;
+        cout << endl << "Escolha uma opcao:" << endl;
+        cout << "1 - Abrir novo arquivo" << endl;
+        cout << "2 - Recriar organizacoes e abrir novo arquivo" << endl;
+        cout << "3 - Sair" << endl;
+        while (escolha < 1 || escolha > 3) {
+            cout << "Opcao escolhida: ";
+            cin >> escolha;
+            if (escolha < 1 || escolha > 3)
+                cout << "Opcao invalida, tente novamente!" << endl;
+        }
+        cout << endl << endl;
+
+        switch (escolha)
+        {
+            case 2:
+                semOrganizacao = true;
+                break;
+
+            case 3:
+                finalizado = true;
+                break;
+        }
     }
-    */
-
-    Resultados resultadoA = calcularResultados(instrucoes, orgA);
-    cout << "RESULTADOS DA ORGANIZACAO A: " << endl;
-    cout << "TOTAL DE CICLOS: " << resultadoA.CiclosTotais << endl;
-    cout << "CPI (Ciclos por Instrucao): " << resultadoA.CPI << endl;
-    cout << "Tempo de execucao: " << resultadoA.TExec << endl;
-    Resultados resultadoB = calcularResultados(instrucoes, orgB);
-    cout << "RESULTADOS DA ORGANIZACAO B: " << endl;
-    cout << "TOTAL DE CICLOS: " << resultadoB.CiclosTotais << endl;
-    cout << "CPI (Ciclos por Instrucao): " << resultadoB.CPI << endl;
-    cout << "Tempo de execucao: " << resultadoB.TExec << endl;
-    compararDesempenhoPorTempoExec(resultadoA.TExec, resultadoB.TExec);
     return 0;
 }
