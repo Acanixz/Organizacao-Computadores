@@ -1,6 +1,6 @@
 /*
 * Disciplina: Organização de Computadores
-* Atividade : Avaliação 01
+* Atividade : Avaliação 02
 *
 * Grupo:
 * - Cassiano de Sena Crispim

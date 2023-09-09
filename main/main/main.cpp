@@ -1,6 +1,6 @@
 /*
 * Disciplina: Organização de Computadores
-* Atividade : Avaliação 01
+* Atividade : Avaliação 02
 * 
 * Grupo:
 * - Cassiano de Sena Crispim
@@ -99,6 +99,38 @@ string lerOpcode(string opcode) {
 
     cout << "(aviso) opcode desconhecido: " << opcode << endl;
     return "?";
+}
+
+// Verifica o vetor de instruções assembly por
+// hazards de pipeline
+// regra base: rd atual não pode ser utilizado
+// nos proximos 2 ciclos
+void verificarHazards(vector<LinhaASM> instrucoes) {
+    cout << "Executando verificacao de hazards" << endl;
+    for (int i = 0; i < instrucoes.size(); i++) {
+        // Ignora a primeira e ultima linha, não precisam de checagem de dependencia
+        if (i == 0 || i == instrucoes.size()) continue;
+
+        // Ignora tipo B e tipo S pois não usam rd
+        if (instrucoes[i].tipoInstrucao == "B") continue;
+        if (instrucoes[i].tipoInstrucao == "S") continue;
+
+        // For loop 2 passos a frente de i
+        // verificação de dependencias
+        for (int j = i + 2; j > i; j--) {
+            // Ignora iteração j caso passe da quantidade de instruções
+            if (j >= instrucoes.size()) continue;
+
+            if (instrucoes[i].rd == instrucoes[j].rs1) {
+                cout << "Hazard encontrada na linha " << j + 1 << ", rs1 vem da linha nao-finalizada " << i+1 << endl;
+            }
+
+            if (instrucoes[i].rd == instrucoes[j].rs2) {
+                cout << "Hazard encontrada na linha " << j + 1 << ", rs2 vem da linha nao-finalizada " << i + 1 << endl;
+            }
+        }
+    }
+    cout << "Verificacao de hazards concluido com exito" << endl;
 }
 
 // Recebe um ifstream para ler e gera um vetor
@@ -218,6 +250,7 @@ int main() {
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
         vector<LinhaASM> instrucoes = lerArquivo(programa);
+        verificarHazards(instrucoes);
 
         /*
         * Debug das informações gerais
