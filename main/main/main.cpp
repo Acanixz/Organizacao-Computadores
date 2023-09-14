@@ -1,16 +1,16 @@
 /*
-* Disciplina: OrganizaÁ„o de Computadores
-* Atividade : AvaliaÁ„o 02
+* Disciplina: Organiza√ß√£o de Computadores
+* Atividade : Avalia√ß√£o 02
 * 
 * Grupo:
 * - Cassiano de Sena Crispim
-* - HÈrick Vitor Vieira Bittencourt
+* - H√©rick Vitor Vieira Bittencourt
 * - Eduardo Miguel Fuchs Perez
 * 
-* OBSERVA«√O:
-* - Devido o uso de for loops com lÛgica [key, value], o padr„o ISO para
-* este projeto deve ser o C++ 17, caso contr·rio a build ir· falhar
-* (v· na aba projeto->propriedades de main no visual studio 2019)
+* OBSERVA√á√ÉO:
+* - Devido o uso de for loops com l√≥gica [key, value], o padr√£o ISO para
+* este projeto deve ser o C++ 17, caso contr√°rio a build ir√° falhar
+* (v√° na aba projeto->propriedades de main no visual studio 2019)
 */
 
 #include <iostream>
@@ -22,12 +22,12 @@
 using namespace std;
 
 
-// Armazena informaÁıes geradas pelo binary dump
+// Armazena informa√ß√µes geradas pelo binary dump
 struct LinhaASM {
-    // InstruÁ„o completa (32 bits)
+    // Instru√ß√£o completa (32 bits)
     string instrucao;
 
-    // Substrings da instruÁ„o completa
+    // Substrings da instru√ß√£o completa
     string opcode;
     string rd;
     string funct3;
@@ -39,29 +39,29 @@ struct LinhaASM {
     string tipoInstrucao;
 };
 
-// Uma organizaÁ„o, utilizado para gerar estatisticas com um vetor de LinhaASM
+// Uma organiza√ß√£o, utilizado para gerar estatisticas com um vetor de LinhaASM
 struct Organizacao {
     float TClock; // Tempo de clock
     float freqClock; // Frequencia de clock (1/TClock)
-    map<string, float> quantCiclos; // Quantos ciclos leva cada instruÁ„o?
+    map<string, float> quantCiclos; // Quantos ciclos leva cada instru√ß√£o?
 
 
     Organizacao() {
         quantCiclos["U"] = 1.f;
         quantCiclos["J"] = 1.f;
         quantCiclos["B"] = 1.f;
-        quantCiclos["I_ar"] = 1.f; // Quant. Ciclos p/ instruÁ„o Imm. Aritmetico e ecall
-        quantCiclos["I_lo"] = 1.f; // Quant. Ciclos p/ instruÁ„o Imm. Load
+        quantCiclos["I_ar"] = 1.f; // Quant. Ciclos p/ instru√ß√£o Imm. Aritmetico e ecall
+        quantCiclos["I_lo"] = 1.f; // Quant. Ciclos p/ instru√ß√£o Imm. Load
         quantCiclos["R"] = 1.f;
         quantCiclos["S"] = 1.f;
     }
 };
 
-// Resultados de desempenho da organizaÁ„o com um binary dump
+// Resultados de desempenho da organiza√ß√£o com um binary dump
 struct Resultados {
     float CiclosTotais; // Ciclos totais gastos
-    float CPI; // Ciclos por instruÁ„o
-    float TExec; // Tempo de execuÁ„o da CPU (Quant. instrucoes * CPI * Clock)
+    float CPI; // Ciclos por instru√ß√£o
+    float TExec; // Tempo de execu√ß√£o da CPU (Quant. instrucoes * CPI * Clock)
 };
 
 // Abre o arquivo, redundante, mas quem sabe
@@ -101,40 +101,57 @@ string lerOpcode(string opcode) {
     return "?";
 }
 
-// Verifica o vetor de instruÁıes assembly por
-// hazards de pipeline
-// regra base: rd atual n„o pode ser utilizado
-// nos proximos 2 ciclos
-void verificarHazards(vector<LinhaASM> instrucoes) {
-    cout << "Executando verificacao de hazards" << endl;
-    for (int i = 0; i < instrucoes.size(); i++) {
-        // Ignora a primeira e ultima linha, n„o precisam de checagem de dependencia
-        if (i == 0 || i == instrucoes.size()) continue;
+void inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
+    cout << "LINHAS PARA INSERIR NOP:" << endl;
+    LinhaASM noOperator; // add zero, zero, zero
+    noOperator.tipoInstrucao = "R";
+    for (int i = hazards.size()-1; i >= 0; i--) {
+        instrucoes.insert(instrucoes.begin() + i, noOperator);
+    }
+}
 
-        // Ignora tipo B e tipo S pois n„o usam rd
+// Verifica o vetor de instru√ß√µes assembly por
+// hazards de pipeline
+// regra base: rd atual n√£o pode ser utilizado
+// nos proximos 2 ciclos
+vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
+    cout << "Executando verificacao de hazards" << endl;
+    vector<int> falhas;
+    for (int i = 0; i < instrucoes.size(); i++) {
+        // Ignora a primeira, n√£o precisa de checagem de dependencia
+        if (i == 0) continue;
+
+        // Ignora tipo B e tipo S pois n√£o usam rd
         if (instrucoes[i].tipoInstrucao == "B") continue;
         if (instrucoes[i].tipoInstrucao == "S") continue;
 
+        // Ignora instru√ß√£o se o registrador de destino for zero, NOP
+        if (instrucoes[i].rd == "00000") continue;
+
         // For loop 2 passos a frente de i
-        // verificaÁ„o de dependencias
+        // verifica√ß√£o de dependencias
         for (int j = i + 2; j > i; j--) {
-            // Ignora iteraÁ„o j caso passe da quantidade de instruÁıes
+            // Ignora itera√ß√£o j caso passe da quantidade de instru√ß√µes
             if (j >= instrucoes.size()) continue;
 
             if (instrucoes[i].rd == instrucoes[j].rs1) {
                 cout << "Hazard encontrada na linha " << j + 1 << ", rs1 vem da linha nao-finalizada " << i+1 << endl;
+                falhas.push_back(i);
             }
 
             if (instrucoes[i].rd == instrucoes[j].rs2) {
                 cout << "Hazard encontrada na linha " << j + 1 << ", rs2 vem da linha nao-finalizada " << i + 1 << endl;
+                falhas.push_back(i);
             }
         }
     }
     cout << "Verificacao de hazards concluido com exito" << endl;
+    inserirNOPs(instrucoes, falhas);
+    return falhas;
 }
 
 // Recebe um ifstream para ler e gera um vetor
-// cada indice do vetor representa uma instruÁ„o de 32 bits
+// cada indice do vetor representa uma instru√ß√£o de 32 bits
 vector<LinhaASM> lerArquivo(ifstream& arquivo) {
     vector<LinhaASM> instrucoes;
 
@@ -150,18 +167,18 @@ vector<LinhaASM> lerArquivo(ifstream& arquivo) {
 
         if (linhaAtual.instrucao.size() != 32) {
             if (arquivo.good()) {
-                // alguma linha n„o est· certa
+                // alguma linha n√£o est√° certa
                 throw std::runtime_error("Nao foi possivel ler a linha " + to_string(i) + ", verifique o arquivo.");
             }
             else {
-                // newline final, sÛ ignorar
+                // newline final, s√≥ ignorar
                 continue;
             }
         }
 
-        // obs: a ordem dos numeros s„o o inverso do site
+        // obs: a ordem dos numeros s√£o o inverso do site
         // https://jemu.oscc.cc/ADD
-        // (site vai da direita pra esquerda, aqui È esq. pra dir.)
+        // (site vai da direita pra esquerda, aqui √© esq. pra dir.)
         linhaAtual.opcode = linhaAtual.instrucao.substr(25, 7);
         linhaAtual.rd = linhaAtual.instrucao.substr(20, 5);
         linhaAtual.funct3 = linhaAtual.instrucao.substr(17, 3);
@@ -179,7 +196,7 @@ vector<LinhaASM> lerArquivo(ifstream& arquivo) {
 }
 
 // Retorna uma organizacao conforme
-// entrada do usu·rio
+// entrada do usu√°rio
 Organizacao criarOrganizacao(string nome) {
     cout << "----------------------\n ORGANIZACAO " << nome << endl;
     Organizacao resultado;
@@ -234,7 +251,7 @@ int main() {
     while (!finalizado) {
         system("cls");
 
-        // Cria as organizaÁıes se elas n„o existem ou usuario quer refazer
+        // Cria as organiza√ß√µes se elas n√£o existem ou usuario quer refazer
         if (semOrganizacao) {
             cout << "Criando organizacoes: " << endl;
             semOrganizacao = false;
@@ -253,7 +270,7 @@ int main() {
         verificarHazards(instrucoes);
 
         /*
-        * Debug das informaÁıes gerais
+        * Debug das informa√ß√µes gerais
         for (int i = 0; i < instrucoes.size(); i++) {
             cout << "INSTRUCAO " << i + 1 << " completa: " << instrucoes[i].instrucao << endl;
             cout << "TIPO DE INSTRUCAO: " << instrucoes[i].tipoInstrucao << endl;
