@@ -101,12 +101,44 @@ string lerOpcode(string opcode) {
     return "?";
 }
 
+bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
+
+    if (instrucaoJ.opcode == "R" || instrucaoJ.opcode == "I_ar" || instrucaoJ.opcode == "I_lo" || instrucaoJ.opcode == "S" || instrucaoJ.opcode == "B") {
+        if (instrucaoOrigem.rd == instrucaoJ.rs1) {
+            return true;
+        }
+    }
+    
+    if (instrucaoJ.opcode == "R" || instrucaoJ.opcode == "S" || instrucaoJ.opcode == "B") {
+        if (instrucaoOrigem.rd == instrucaoJ.rs2) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
-    cout << "LINHAS PARA INSERIR NOP:" << endl;
     LinhaASM noOperator; // add zero, zero, zero
     noOperator.tipoInstrucao = "R";
-    for (int i = hazards.size()-1; i >= 0; i--) {
-        instrucoes.insert(instrucoes.begin() + i, noOperator);
+
+    // TODO: fazer o for loop i ir do começo ao fim
+    for (int i = hazards.size() - 1; i >= 0; i--) {
+        // Quantidade de NOPs a serem adicionados, max 2, min 0
+        int quantNOPs = 2;
+
+        // Como mais elementos são adicionados ao array, precisamos de um offset se manter nas posições corretas
+        //int offset = 0;
+
+        // TODO: possivel incrementar hazards relativo a quantNOPs para correção de erros
+
+        for (int j = hazards[i]; j < hazards[i] + 2; j++) {
+            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[hazards[j]]) ) {
+                for (int k = 0; k < quantNOPs; k++) {
+                    instrucoes.insert(instrucoes.begin() + i, noOperator);
+                }
+            }
+            quantNOPs--;
+        }
     }
 }
 
@@ -130,17 +162,12 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
 
         // For loop 2 passos a frente de i
         // verificação de dependencias
-        for (int j = i + 2; j > i; j--) {
+        for (int j = i; j < i+2; j++) {
             // Ignora iteração j caso passe da quantidade de instruções
             if (j >= instrucoes.size()) continue;
 
-            if (instrucoes[i].rd == instrucoes[j].rs1) {
-                cout << "Hazard encontrada na linha " << j + 1 << ", rs1 vem da linha nao-finalizada " << i+1 << endl;
-                falhas.push_back(i);
-            }
-
-            if (instrucoes[i].rd == instrucoes[j].rs2) {
-                cout << "Hazard encontrada na linha " << j + 1 << ", rs2 vem da linha nao-finalizada " << i + 1 << endl;
+            if (verificarHazardInstrucao(instrucoes[i], instrucoes[j])) {
+                cout << "Hazard encontrada na linha " << j + 1 << " vindo da linha nao-finalizada " << i + 1 << endl;
                 falhas.push_back(i);
             }
         }
