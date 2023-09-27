@@ -387,10 +387,10 @@ int main() {
         cout << "1 - Abrir novo arquivo" << endl;
         cout << "2 - Recriar organizacoes e abrir novo arquivo" << endl;
         cout << "3 - Sair" << endl;
-        while (escolha < 1 || escolha > 3) {
+        while (escolha < 1 || escolha > 4) {
             cout << "Opcao escolhida: ";
             cin >> escolha;
-            if (escolha < 1 || escolha > 3)
+            if (escolha < 1 || escolha > 4)
                 cout << "Opcao invalida, tente novamente!" << endl;
         }
         cout << endl << endl;
