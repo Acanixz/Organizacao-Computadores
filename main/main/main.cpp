@@ -327,6 +327,12 @@ int main() {
             semOrganizacao = false;
             orgA = criarOrganizacao("A");
         }
+        
+        string nomeFornecido = "";
+        cout << "Forneca o nome/caminho do arquivo contendo as instrucoes: " << endl;
+        cin >> nomeFornecido;
+        cout << endl << endl;
+
         /* Placeholder para seleção de técnica
         int tecnica=0;
         cout << "Escolha a técnica:" << endl;
@@ -334,18 +340,33 @@ int main() {
         cout << "2- Forwarding, inserção de NOPs" << endl;
         cout << "3- Sem solução em hardware, reordenamento, inserção de NOPs" << endl;
         cout << "4- Forwarding. reordenamento, inserção de NOPs" << endl;
-        while (tecnica < 1 || tecnica > 3) {
+        while (tecnica < 1 || tecnica > 4) {
             cout << "Opcao escolhida: ";
             cin >> tecnica;
-            if (tecnica < 1 || tecnica > 3)
+            if (tecnica < 1 || tecnica > 4)
                 cout << "Opcao invalida, tente novamente!" << endl;
+        }
+
+        if (tecnica=1) {
+            ifstream programa;
+            abrirArquivo(programa, nomeFornecido);
+            vector<LinhaASM> instrucoes = lerArquivo(programa);
+            VisualizarInstrucoes(instrucoes, true);
+            vector<int> falhas = verificarHazards(instrucoes);
+            instrucoes = inserirNOPs(instrucoes, falhas);
+            VisualizarInstrucoes(instrucoes, true);
+            verificarHazards(instrucoes);
+        }else if (tecnica=2) {
+            cout << "Tecnica ainda nao implementada!" << endl;
+            cin >> tecnica;
+        }else if (tecnica = 3) {
+            cout << "Tecnica ainda nao implementada!" << endl;
+            cin >> tecnica;
+        }else if (tecnica = 4) {
+            cout << "Tecnica ainda nao implementada!" << endl;
+            cin >> tecnica;
         }*/
-
-        string nomeFornecido = "";
-        cout << "Forneca o nome/caminho do arquivo contendo as instrucoes: " << endl;
-        cin >> nomeFornecido;
-        cout << endl << endl;
-
+        
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
         vector<LinhaASM> instrucoes = lerArquivo(programa);
