@@ -39,6 +39,28 @@ struct LinhaASM {
     string tipoInstrucao;
 };
 
+// Mostra na tela todas as instrucoes do programa
+// (além de poder destacar NOPs se preferido)
+void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = false) {
+    cout << "----------------------" << endl;
+    cout << "VISUALIZANDO PROGRAMA:" << endl;
+
+    for (int i = 0; i < programa.size(); i++) {
+        cout << (i + 1) << ": " << programa[i].instrucao;
+        if (destacarNOPs) {
+            if (programa[i].tipoInstrucao != "S") {
+                if (programa[i].rd == "00000") {
+                    // OBS: jump-and-links e ecall podem acabar sendo considerados NOP
+                    cout << " | NOP |";
+                }
+            }
+        }
+        cout << endl;
+    }
+
+    cout << "----------------------" << endl;
+}
+
 // Uma organização, utilizado para gerar estatisticas com um vetor de LinhaASM
 struct Organizacao {
     float TClock; // Tempo de clock
@@ -103,6 +125,13 @@ string lerOpcode(string opcode) {
 
 bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
 
+    // A instrução tipo S não faz nenhuma escrita, logo, as proximas linhas não irão ter problemas de dependencia
+    if (instrucaoOrigem.tipoInstrucao == "S") return false;
+
+    // NO-Operators, ignora
+    if (instrucaoOrigem.instrucao == "00000000000000000000000000110011") return false;
+    if (instrucaoJ.instrucao == "00000000000000000000000000110011") return false;
+
     if (instrucaoJ.tipoInstrucao == "R" || instrucaoJ.tipoInstrucao == "I_ar" || instrucaoJ.tipoInstrucao == "I_lo" || instrucaoJ.tipoInstrucao == "S" || instrucaoJ.tipoInstrucao == "B") {
         if (instrucaoOrigem.rd == instrucaoJ.rs1) {
             return true;
@@ -117,9 +146,23 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
     return false;
 }
 
-void inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
+vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
+    // Certo, nos temos um array contendo as instruções I (origens cujo possuem no minimo 1 hazard nas proximas 2 linhas)
+    // Se formos de baixo pra cima, o array será mais fácil de mexer
+    // Ao verificar as instruções, precisamos ir de cima pra baixo a partir de I, começando em I+1 até ser maior que I+2
+    // Se o hazard for na primeira linha, será necessário adicionar dois NOPs
+    // Se o hazard for na segunda linha, será necessário adicionar um NOP
+
     LinhaASM noOperator; // add zero, zero, zero
-    noOperator.tipoInstrucao = "R";
+    noOperator.instrucao = "00000000000000000000000000110011";
+
+    noOperator.opcode = noOperator.instrucao.substr(25, 7);
+    noOperator.rd = noOperator.instrucao.substr(20, 5);
+    noOperator.funct3 = noOperator.instrucao.substr(17, 3);
+    noOperator.rs1 = noOperator.instrucao.substr(12, 5);
+    noOperator.rs2 = noOperator.instrucao.substr(7, 5);
+    noOperator.funct7 = noOperator.instrucao.substr(0, 7);
+    noOperator.tipoInstrucao = lerOpcode(noOperator.opcode);
 
     // TODO: fazer o for loop i ir do começo ao fim
     for (int i = hazards.size() - 1; i >= 0; i--) {
@@ -131,15 +174,20 @@ void inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
 
         // TODO: possivel incrementar hazards relativo a quantNOPs para correção de erros
 
-        for (int j = hazards[i]+1; j <= hazards[i] + 2; j++) {
-            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[hazards[j]])) {
+        for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
+            if (j > hazards.size() - 1) continue;
+            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[j])) {
                 for (int k = 0; k < quantNOPs; k++) {
-                    instrucoes.insert(instrucoes.begin() + i, noOperator);
+                    cout << "Inserido NOP na linha " << (i+1) << " para corrigir a dep. da linha " << j << endl;
+                    cout << "INFORMACOES: \nI: " << instrucoes[hazards[i]].instrucao << "\nJ: " << instrucoes[j].instrucao << endl << endl;
+                    instrucoes.insert(instrucoes.begin() + i + 1, noOperator);
                 }
             }
             quantNOPs--;
         }
     }
+    cout << "NO OPERATORS INSERIDOS COM SUCESSO" << endl;
+    return instrucoes;
 }
 
 // Verifica o vetor de instruções assembly por
@@ -150,15 +198,10 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
     cout << "Executando verificacao de hazards" << endl;
     vector<int> falhas;
     for (int i = 0; i < instrucoes.size(); i++) {
-        // Ignora a primeira, não precisa de checagem de dependencia
-        if (i == 0) continue;
-
-        // Ignora tipo B e tipo S pois não usam rd
-        if (instrucoes[i].tipoInstrucao == "B") continue;
-        if (instrucoes[i].tipoInstrucao == "S") continue;
-
         // Ignora instrução se o registrador de destino for zero, NOP
-        if (instrucoes[i].rd == "00000") continue;
+        if (instrucoes[i].tipoInstrucao != "S") {
+            if (instrucoes[i].rd == "00000") continue;
+        }
 
         // For loop 2 passos a frente de i
         // verificação de dependencias
@@ -174,7 +217,6 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
         }
     }
     cout << "Verificacao de hazards concluido com exito" << endl;
-    inserirNOPs(instrucoes, falhas);
     return falhas;
 }
 
@@ -284,7 +326,6 @@ int main() {
             cout << "Criando organizacoes: " << endl;
             semOrganizacao = false;
             orgA = criarOrganizacao("A");
-            orgB = criarOrganizacao("B");
         }
 
         string nomeFornecido = "";
@@ -295,6 +336,10 @@ int main() {
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
         vector<LinhaASM> instrucoes = lerArquivo(programa);
+        VisualizarInstrucoes(instrucoes, true);
+        vector<int> falhas = verificarHazards(instrucoes);
+        instrucoes = inserirNOPs(instrucoes, falhas);
+        VisualizarInstrucoes(instrucoes, true);
         verificarHazards(instrucoes);
 
         /*
@@ -313,6 +358,7 @@ int main() {
         }
         */
 
+        /*
         Resultados resultadoA = calcularResultados(instrucoes, orgA);
         cout << "RESULTADOS DA ORGANIZACAO A: " << endl;
         cout << "TOTAL DE CICLOS: " << resultadoA.CiclosTotais << endl;
@@ -320,14 +366,8 @@ int main() {
         cout << "Tempo de execucao: " << resultadoA.TExec << endl;
 
         cout << "----------------------" << endl;
-
-        Resultados resultadoB = calcularResultados(instrucoes, orgB);
-        cout << "RESULTADOS DA ORGANIZACAO B: " << endl;
-        cout << "TOTAL DE CICLOS: " << resultadoB.CiclosTotais << endl;
-        cout << "CPI (Ciclos por Instrucao): " << resultadoB.CPI << endl;
-        cout << "Tempo de execucao: " << resultadoB.TExec << endl;
-
-        compararDesempenhoPorTempoExec(resultadoA.TExec, resultadoB.TExec);
+        */
+        
 
         int escolha = 0;
         cout << endl << "Escolha uma opcao:" << endl;
