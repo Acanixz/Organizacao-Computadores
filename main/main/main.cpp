@@ -313,6 +313,33 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
     return resultado;
 }
 
+void solucao(int tecnica) {
+    if (tecnica = 1) {
+        ifstream programa;
+        abrirArquivo(programa, nomeFornecido);
+        vector<LinhaASM> instrucoes = lerArquivo(programa);
+        VisualizarInstrucoes(instrucoes, true);
+        vector<int> falhas = verificarHazards(instrucoes);
+        instrucoes = inserirNOPs(instrucoes, falhas);
+        VisualizarInstrucoes(instrucoes, true);
+        verificarHazards(instrucoes);
+    }
+    /*
+    else if (tecnica = 2) {
+        cout << "Tecnica ainda nao implementada!" << endl;
+        cin >> tecnica;
+    }
+    else if (tecnica = 3) {
+        cout << "Tecnica ainda nao implementada!" << endl;
+        cin >> tecnica;
+    }
+    else if (tecnica = 4) {
+        cout << "Tecnica ainda nao implementada!" << endl;
+        cin >> tecnica;
+    }
+     */
+}
+
 int main() {
     bool finalizado = false;
     bool semOrganizacao = true;
@@ -343,29 +370,25 @@ int main() {
         while (tecnica < 1 || tecnica > 4) {
             cout << "Opcao escolhida: ";
             cin >> tecnica;
-            if (tecnica < 1 || tecnica > 4)
+            if (tecnica < 1 || tecnica > 4){
                 cout << "Opcao invalida, tente novamente!" << endl;
+            }
+            else if (tecnica = 2) {
+                cout << "Tecnica ainda nao implementada!" << endl;
+                cin >> tecnica;
+            }
+            else if (tecnica = 3) {
+                cout << "Tecnica ainda nao implementada!" << endl;
+                cin >> tecnica;
+            }
+            else if (tecnica = 4) {
+                cout << "Tecnica ainda nao implementada!" << endl;
+                cin >> tecnica;
+            }
         }
-
-        if (tecnica=1) {
-            ifstream programa;
-            abrirArquivo(programa, nomeFornecido);
-            vector<LinhaASM> instrucoes = lerArquivo(programa);
-            VisualizarInstrucoes(instrucoes, true);
-            vector<int> falhas = verificarHazards(instrucoes);
-            instrucoes = inserirNOPs(instrucoes, falhas);
-            VisualizarInstrucoes(instrucoes, true);
-            verificarHazards(instrucoes);
-        }else if (tecnica=2) {
-            cout << "Tecnica ainda nao implementada!" << endl;
-            cin >> tecnica;
-        }else if (tecnica = 3) {
-            cout << "Tecnica ainda nao implementada!" << endl;
-            cin >> tecnica;
-        }else if (tecnica = 4) {
-            cout << "Tecnica ainda nao implementada!" << endl;
-            cin >> tecnica;
-        }*/
+           
+        solucao(tecnica);
+        */
         
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
