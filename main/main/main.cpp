@@ -178,7 +178,7 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
             if (j > hazards.size() - 1) continue;
             if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[j])) {
                 for (int k = 0; k < quantNOPs; k++) {
-                    cout << "Inserido NOP na linha " << (i+1) << " para corrigir a dep. da linha " << j << endl;
+                    cout << "Inserido NOP na linha " << (i+1) << " para corrigir a dep. da linha " << (j+1) << endl;
                     cout << "INFORMACOES: \nI: " << instrucoes[hazards[i]].instrucao << "\nJ: " << instrucoes[j].instrucao << endl << endl;
                     instrucoes.insert(instrucoes.begin() + i + 1, noOperator);
                 }
@@ -313,7 +313,8 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
     return resultado;
 }
 
-void solucao(int tecnica) {
+
+void solucao(int tecnica, string nomeFornecido) {
     if (tecnica = 1) {
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
@@ -354,7 +355,7 @@ int main() {
             semOrganizacao = false;
             orgA = criarOrganizacao("A");
         }
-        
+
         string nomeFornecido = "";
         cout << "Forneca o nome/caminho do arquivo contendo as instrucoes: " << endl;
         cin >> nomeFornecido;
@@ -387,17 +388,9 @@ int main() {
             }
         }
            
-        solucao(tecnica);
+        solucao(tecnica, nomeFornecido);
         */
-        
-        ifstream programa;
-        abrirArquivo(programa, nomeFornecido);
-        vector<LinhaASM> instrucoes = lerArquivo(programa);
-        VisualizarInstrucoes(instrucoes, true);
-        vector<int> falhas = verificarHazards(instrucoes);
-        instrucoes = inserirNOPs(instrucoes, falhas);
-        VisualizarInstrucoes(instrucoes, true);
-        verificarHazards(instrucoes);
+
 
         /*
         * Debug das informações gerais
@@ -431,10 +424,10 @@ int main() {
         cout << "1 - Abrir novo arquivo" << endl;
         cout << "2 - Recriar organizacoes e abrir novo arquivo" << endl;
         cout << "3 - Sair" << endl;
-        while (escolha < 1 || escolha > 4) {
+        while (escolha < 1 || escolha > 3) {
             cout << "Opcao escolhida: ";
             cin >> escolha;
-            if (escolha < 1 || escolha > 4)
+            if (escolha < 1 || escolha > 3)
                 cout << "Opcao invalida, tente novamente!" << endl;
         }
         cout << endl << endl;
