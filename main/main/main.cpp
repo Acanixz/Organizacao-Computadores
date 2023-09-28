@@ -365,25 +365,27 @@ int main() {
         cin >> nomeFornecido;
         cout << endl << endl;
 
-        int tecnica=0;
-        cout << "Escolha a técnica:" << endl;
-        cout << "1- Sem solução em hardware, inserção de NOPs" << endl;
-        cout << "2- Forwarding, inserção de NOPs" << endl;
-        cout << "3- Sem solução em hardware, reordenamento, inserção de NOPs" << endl;
-        cout << "4- Forwarding. reordenamento, inserção de NOPs" << endl;
+        int tecnica = 0;
+        cout << "Escolha a tecnica:" << endl;
+        cout << "1- Sem solucao em hardware, insercao de NOPs" << endl;
+        cout << "2- Forwarding, insercao de NOPs" << endl;
+        cout << "3- Sem solucao em hardware, reordenamento, insercao de NOPs" << endl;
+        cout << "4- Forwarding. reordenamento, insercao de NOPs" << endl;
         while (tecnica < 1 || tecnica > 4) {
             cout << "Opcao escolhida: ";
             cin >> tecnica;
+
+
             if (tecnica < 1 || tecnica > 4){
                 cout << "Opcao invalida, tente novamente!" << endl;
             }
-            else if (tecnica = 2) {
+            else if (tecnica == 2) {
                 cout << "Tecnica ainda nao implementada!" << endl;
             }
-            else if (tecnica = 3) {
+            else if (tecnica == 3) {
                 cout << "Tecnica ainda nao implementada!" << endl;
             }
-            else if (tecnica = 4) {
+            else if (tecnica == 4) {
                 cout << "Tecnica ainda nao implementada!" << endl;
             }
         }
