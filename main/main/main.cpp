@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Disciplina: Organização de Computadores
 * Atividade : Avaliação 02
 *
@@ -48,11 +48,8 @@ void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = false) 
     for (int i = 0; i < programa.size(); i++) {
         cout << (i + 1) << ": " << programa[i].instrucao;
         if (destacarNOPs) {
-            if (programa[i].tipoInstrucao != "S") {
-                if (programa[i].rd == "00000") {
-                    // OBS: jump-and-links e ecall podem acabar sendo considerados NOP
-                    cout << " | NOP |";
-                }
+            if (programa[i].instrucao == "00000000000000000000000000110011") {
+                cout << " | NOP |";
             }
         }
         cout << endl;
@@ -134,12 +131,14 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
 
     if (instrucaoJ.tipoInstrucao == "R" || instrucaoJ.tipoInstrucao == "I_ar" || instrucaoJ.tipoInstrucao == "I_lo" || instrucaoJ.tipoInstrucao == "S" || instrucaoJ.tipoInstrucao == "B") {
         if (instrucaoOrigem.rd == instrucaoJ.rs1) {
+            cout << "RD de origem conflita com rs1!" << endl;
             return true;
         }
     }
 
     if (instrucaoJ.tipoInstrucao == "R" || instrucaoJ.tipoInstrucao == "S" || instrucaoJ.tipoInstrucao == "B") {
         if (instrucaoOrigem.rd == instrucaoJ.rs2) {
+            cout << "RD de origem conflita com rs2!" << endl;
             return true;
         }
     }
@@ -170,17 +169,22 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
         int quantNOPs = 2;
 
         // Como mais elementos são adicionados ao array, precisamos de um offset se manter nas posições corretas
-        //int offset = 0;
-
-        // TODO: possivel incrementar hazards relativo a quantNOPs para correção de erros
+        int offset = 0;
 
         for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
-            if (j > hazards.size() - 1) continue;
-            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[j])) {
+            // Ignora iteração j caso passe da quantidade de instruções
+            if (j > instrucoes.size() - 1) continue;
+
+            // Verifica por hazard com:
+            // linha de origem = hazards[i] + offset
+            // linha J = j(hazards[i]+ 1 ou 2) + offset
+            if (verificarHazardInstrucao(
+                instrucoes[hazards[i] + offset],
+                instrucoes[j + offset]
+            )) {
                 for (int k = 0; k < quantNOPs; k++) {
-                    cout << "Inserido NOP na linha " << (i+1) << " para corrigir a dep. da linha " << (j+1) << endl;
-                    cout << "INFORMACOES: \nI: " << instrucoes[hazards[i]].instrucao << "\nJ: " << instrucoes[j].instrucao << endl << endl;
-                    instrucoes.insert(instrucoes.begin() + i + 1, noOperator);
+                    instrucoes.insert(instrucoes.begin()+ hazards[i] + 1 + offset, noOperator);
+                    offset++;
                 }
             }
             quantNOPs--;
@@ -211,7 +215,7 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
             //cout << "Verificando " << j + 1 << " de origem " << i + 1 << endl;
             //cout << "Tipos: \nJ: " + instrucoes[j].tipoInstrucao << "\nI: " << instrucoes[i].tipoInstrucao << "\nRD do I: " << instrucoes[i].rd << "\nRS1 e RS2 do J: " << instrucoes[j].rs1 << " | " << instrucoes[j].rs2 << endl;
             if (verificarHazardInstrucao(instrucoes[i], instrucoes[j])) {
-                cout << "Hazard encontrada na linha " << j + 1 << " vindo da linha nao-finalizada " << i + 1 << endl;
+                cout << "| Hazard encontrada na linha " << j + 1 << " vindo da linha nao-finalizada " << i + 1 << endl;
                 falhas.push_back(i);
             }
         }
@@ -361,7 +365,6 @@ int main() {
         cin >> nomeFornecido;
         cout << endl << endl;
 
-        /* Placeholder para seleção de técnica
         int tecnica=0;
         cout << "Escolha a técnica:" << endl;
         cout << "1- Sem solução em hardware, inserção de NOPs" << endl;
@@ -376,20 +379,16 @@ int main() {
             }
             else if (tecnica = 2) {
                 cout << "Tecnica ainda nao implementada!" << endl;
-                cin >> tecnica;
             }
             else if (tecnica = 3) {
                 cout << "Tecnica ainda nao implementada!" << endl;
-                cin >> tecnica;
             }
             else if (tecnica = 4) {
                 cout << "Tecnica ainda nao implementada!" << endl;
-                cin >> tecnica;
             }
         }
            
         solucao(tecnica, nomeFornecido);
-        */
 
 
         /*
