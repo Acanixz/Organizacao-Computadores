@@ -145,6 +145,22 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
     return false;
 }
 
+// Insere um NOP a frente de cada jump, só pra ter certeza
+vector<LinhaASM> inserirNOPsEmJump(vector<LinhaASM> instrucoes) {
+    LinhaASM noOperator; // add zero, zero, zero
+    noOperator.instrucao = "00000000000000000000000000110011";
+
+    int offset = 0;
+    for (int i = 0; i < instrucoes.size(); i++) {
+        if (instrucoes[i].tipoInstrucao == "J") {
+            instrucoes.insert(instrucoes.begin() + i + 1 + offset, noOperator);
+            offset++;
+        }
+    }
+    return instrucoes;
+}
+
+// Solução 1
 vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
     // Certo, nos temos um array contendo as instruções I (origens cujo possuem no minimo 1 hazard nas proximas 2 linhas)
     // Se formos de baixo pra cima, o array será mais fácil de mexer
@@ -191,8 +207,10 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
         }
     }
     cout << "NO OPERATORS INSERIDOS COM SUCESSO" << endl;
-    return instrucoes;
+    return inserirNOPsEmJump(instrucoes);
 }
+
+
 
 // Verifica o vetor de instruções assembly por
 // hazards de pipeline
