@@ -195,8 +195,8 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
             // linha de origem = hazards[i] + offset
             // linha J = j(hazards[i]+ 1 ou 2) + offset
             if (verificarHazardInstrucao(
-                instrucoes[hazards[i] + offset],
-                instrucoes[j + offset]
+                instrucoes[offset + hazards[i]],
+                instrucoes[offset + j]
             )) {
                 for (int k = 0; k < quantNOPs; k++) {
                     instrucoes.insert(instrucoes.begin()+ hazards[i] + 1 + offset, noOperator);
