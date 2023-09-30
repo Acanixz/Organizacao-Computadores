@@ -37,6 +37,7 @@ struct LinhaASM {
 
     // Variaveis informativas
     string tipoInstrucao;
+    bool isManualNOP = false;
 };
 
 // Mostra na tela todas as instrucoes do programa
@@ -48,7 +49,7 @@ void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = false) 
     for (int i = 0; i < programa.size(); i++) {
         cout << (i + 1) << ": " << programa[i].instrucao;
         if (destacarNOPs) {
-            if (programa[i].instrucao == "00000000000000000000000000110011") {
+            if (programa[i].isManualNOP) {
                 cout << " | NOP |";
             }
         }
@@ -126,8 +127,12 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
     if (instrucaoOrigem.tipoInstrucao == "S") return false;
 
     // NO-Operators, ignora
-    if (instrucaoOrigem.instrucao == "00000000000000000000000000110011") return false;
-    if (instrucaoJ.instrucao == "00000000000000000000000000110011") return false;
+    if (instrucaoOrigem.isManualNOP) return false;
+    if (instrucaoJ.isManualNOP) return false;
+
+    // Ignora ecalls
+    if (instrucaoJ.instrucao == "00000000000000000000000001110011") return false;
+
 
     if (instrucaoJ.tipoInstrucao == "R" || instrucaoJ.tipoInstrucao == "I_ar" || instrucaoJ.tipoInstrucao == "I_lo" || instrucaoJ.tipoInstrucao == "S" || instrucaoJ.tipoInstrucao == "B") {
         if (instrucaoOrigem.rd == instrucaoJ.rs1) {
@@ -149,12 +154,11 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
 vector<LinhaASM> inserirNOPsEmJump(vector<LinhaASM> instrucoes) {
     LinhaASM noOperator; // add zero, zero, zero
     noOperator.instrucao = "00000000000000000000000000110011";
+    noOperator.isManualNOP = true;
 
-    int offset = 0;
-    for (int i = 0; i < instrucoes.size(); i++) {
+    for (int i = instrucoes.size()-1; i >= 0; i--) {
         if (instrucoes[i].tipoInstrucao == "J") {
-            instrucoes.insert(instrucoes.begin() + i + 1 + offset, noOperator);
-            offset++;
+            instrucoes.insert(instrucoes.begin() + i, noOperator);
         }
     }
     return instrucoes;
@@ -178,29 +182,22 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
     noOperator.rs2 = noOperator.instrucao.substr(7, 5);
     noOperator.funct7 = noOperator.instrucao.substr(0, 7);
     noOperator.tipoInstrucao = lerOpcode(noOperator.opcode);
+    noOperator.isManualNOP = true;
 
-    // TODO: fazer o for loop i ir do começo ao fim
     for (int i = hazards.size() - 1; i >= 0; i--) {
         // Quantidade de NOPs a serem adicionados, max 2, min 0
         int quantNOPs = 2;
-
-        // Como mais elementos são adicionados ao array, precisamos de um offset se manter nas posições corretas
-        int offset = 0;
 
         for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
             // Ignora iteração j caso passe da quantidade de instruções
             if (j > instrucoes.size() - 1) continue;
 
-            // Verifica por hazard com:
-            // linha de origem = hazards[i] + offset
-            // linha J = j(hazards[i]+ 1 ou 2) + offset
             if (verificarHazardInstrucao(
-                instrucoes[offset + hazards[i]],
-                instrucoes[offset + j]
+                instrucoes[hazards[i]],
+                instrucoes[j]
             )) {
                 for (int k = 0; k < quantNOPs; k++) {
-                    instrucoes.insert(instrucoes.begin()+ hazards[i] + 1 + offset, noOperator);
-                    offset++;
+                    instrucoes.insert(instrucoes.begin() + hazards[i] + 1, noOperator);
                 }
             }
             quantNOPs--;
