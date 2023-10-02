@@ -42,7 +42,7 @@ struct LinhaASM {
 
 // Mostra na tela todas as instrucoes do programa
 // (além de poder destacar NOPs se preferido)
-void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = false) {
+void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = true) {
     cout << "----------------------" << endl;
     cout << "VISUALIZANDO PROGRAMA:" << endl;
 
@@ -213,7 +213,9 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
 // hazards de pipeline
 // regra base: rd atual não pode ser utilizado
 // nos proximos 2 ciclos
-vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
+// exceto caso haja implementação de fowarding, que ai
+// é apenas um ciclo
+vector<int> verificarHazards(vector<LinhaASM> instrucoes, bool forwardingImplementado = false) {
     cout << "Executando verificacao de hazards" << endl;
     vector<int> falhas;
     for (int i = 0; i < instrucoes.size(); i++) {
@@ -224,9 +226,13 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes) {
 
         // For loop 2 passos a frente de i
         // verificação de dependencias
-        for (int j = i+1; j <= i + 2; j++) {
+        for (int j = i+1; j <= i+2; j++) {
             // Ignora iteração j caso passe da quantidade de instruções
             if (j >= instrucoes.size()) continue;
+
+            // Ignora segunda iteração caso forwarding esteja implementado
+            if (j == i + 2 && forwardingImplementado) continue;
+
             //cout << "Verificando " << j + 1 << " de origem " << i + 1 << endl;
             //cout << "Tipos: \nJ: " + instrucoes[j].tipoInstrucao << "\nI: " << instrucoes[i].tipoInstrucao << "\nRD do I: " << instrucoes[i].rd << "\nRS1 e RS2 do J: " << instrucoes[j].rs1 << " | " << instrucoes[j].rs2 << endl;
             if (verificarHazardInstrucao(instrucoes[i], instrucoes[j])) {
@@ -334,21 +340,27 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
 
 
 void solucao(int tecnica, string nomeFornecido) {
-    if (tecnica = 1) {
+    if (tecnica == 1) {
         ifstream programa;
         abrirArquivo(programa, nomeFornecido);
         vector<LinhaASM> instrucoes = lerArquivo(programa);
-        VisualizarInstrucoes(instrucoes, true);
+        VisualizarInstrucoes(instrucoes);
         vector<int> falhas = verificarHazards(instrucoes);
         instrucoes = inserirNOPs(instrucoes, falhas);
-        VisualizarInstrucoes(instrucoes, true);
+        VisualizarInstrucoes(instrucoes);
         verificarHazards(instrucoes);
     }
-    /*
-    else if (tecnica = 2) {
-        cout << "Tecnica ainda nao implementada!" << endl;
-        cin >> tecnica;
+    else if (tecnica == 2) {
+        ifstream programa;
+        abrirArquivo(programa, nomeFornecido);
+        vector<LinhaASM> instrucoes = lerArquivo(programa);
+        VisualizarInstrucoes(instrucoes);
+        vector<int> falhas = verificarHazards(instrucoes, true);
+        instrucoes = inserirNOPs(instrucoes, falhas);
+        VisualizarInstrucoes(instrucoes);
+        verificarHazards(instrucoes, true);
     }
+    /*
     else if (tecnica = 3) {
         cout << "Tecnica ainda nao implementada!" << endl;
         cin >> tecnica;
@@ -393,9 +405,6 @@ int main() {
 
             if (tecnica < 1 || tecnica > 4){
                 cout << "Opcao invalida, tente novamente!" << endl;
-            }
-            else if (tecnica == 2) {
-                cout << "Tecnica ainda nao implementada!" << endl;
             }
             else if (tecnica == 3) {
                 cout << "Tecnica ainda nao implementada!" << endl;
