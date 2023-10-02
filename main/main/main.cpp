@@ -165,7 +165,7 @@ vector<LinhaASM> inserirNOPsEmJump(vector<LinhaASM> instrucoes) {
 }
 
 // Solução 1
-vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
+vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards, bool forwardingImplementado) {
     // Certo, nos temos um array contendo as instruções I (origens cujo possuem no minimo 1 hazard nas proximas 2 linhas)
     // Se formos de baixo pra cima, o array será mais fácil de mexer
     // Ao verificar as instruções, precisamos ir de cima pra baixo a partir de I, começando em I+1 até ser maior que I+2
@@ -185,8 +185,8 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
     noOperator.isManualNOP = true;
 
     for (int i = hazards.size() - 1; i >= 0; i--) {
-        // Quantidade de NOPs a serem adicionados, max 2, min 0
-        int quantNOPs = 2;
+        // Quantidade de NOPs a serem adicionados, 2 se não tiver forwarding, 1 se tiver
+        int quantNOPs = forwardingImplementado ? 1 : 2;
 
         for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
             // Ignora iteração j caso passe da quantidade de instruções
@@ -215,7 +215,7 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards) {
 // nos proximos 2 ciclos
 // exceto caso haja implementação de fowarding, que ai
 // é apenas um ciclo
-vector<int> verificarHazards(vector<LinhaASM> instrucoes, bool forwardingImplementado = false) {
+vector<int> verificarHazards(vector<LinhaASM> instrucoes, bool forwardingImplementado) {
     cout << "Executando verificacao de hazards" << endl;
     vector<int> falhas;
     for (int i = 0; i < instrucoes.size(); i++) {
@@ -345,10 +345,10 @@ void solucao(int tecnica, string nomeFornecido) {
         abrirArquivo(programa, nomeFornecido);
         vector<LinhaASM> instrucoes = lerArquivo(programa);
         VisualizarInstrucoes(instrucoes);
-        vector<int> falhas = verificarHazards(instrucoes);
-        instrucoes = inserirNOPs(instrucoes, falhas);
+        vector<int> falhas = verificarHazards(instrucoes, false);
+        instrucoes = inserirNOPs(instrucoes, falhas, false);
         VisualizarInstrucoes(instrucoes);
-        verificarHazards(instrucoes);
+        verificarHazards(instrucoes, false);
     }
     else if (tecnica == 2) {
         ifstream programa;
@@ -356,7 +356,7 @@ void solucao(int tecnica, string nomeFornecido) {
         vector<LinhaASM> instrucoes = lerArquivo(programa);
         VisualizarInstrucoes(instrucoes);
         vector<int> falhas = verificarHazards(instrucoes, true);
-        instrucoes = inserirNOPs(instrucoes, falhas);
+        instrucoes = inserirNOPs(instrucoes, falhas, true);
         VisualizarInstrucoes(instrucoes);
         verificarHazards(instrucoes, true);
     }
