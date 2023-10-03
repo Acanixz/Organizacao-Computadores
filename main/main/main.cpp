@@ -59,6 +59,24 @@ void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = true) {
     cout << "----------------------" << endl;
 }
 
+void salvarPrograma(vector<LinhaASM> programa, string nomePrograma) {
+    ofstream arquivoFinal(nomePrograma);
+
+    // Verificação de abertura do arquivo
+    if (!arquivoFinal.is_open()) {
+        throw std::runtime_error("Nao foi possivel abrir o arquivo " + nomePrograma + " para escrita");
+        return;
+    }
+
+    // Transferencia das instruções do vetor para o arquivo
+    for (LinhaASM linha : programa) {
+        arquivoFinal << linha.instrucao << endl;
+    }
+
+    cout << "Instrucoes salvas com exito em " << nomePrograma << endl;
+    arquivoFinal.close();
+}
+
 // Uma organização, utilizado para gerar estatisticas com um vetor de LinhaASM
 struct Organizacao {
     float TClock; // Tempo de clock
@@ -121,7 +139,7 @@ string lerOpcode(string opcode) {
     return "?";
 }
 
-bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
+bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ, bool forwardingImplementado) {
 
     // A instrução tipo S não faz nenhuma escrita, logo, as proximas linhas não irão ter problemas de dependencia
     if (instrucaoOrigem.tipoInstrucao == "S") return false;
@@ -133,6 +151,8 @@ bool verificarHazardInstrucao(LinhaASM instrucaoOrigem, LinhaASM instrucaoJ) {
     // Ignora ecalls
     if (instrucaoJ.instrucao == "00000000000000000000000001110011") return false;
 
+    // Se forwardingImplementado, apenas procura por hazards cujo a instrução origem é lw
+    if (forwardingImplementado && instrucaoOrigem.tipoInstrucao != "I_lo") return false;
 
     if (instrucaoJ.tipoInstrucao == "R" || instrucaoJ.tipoInstrucao == "I_ar" || instrucaoJ.tipoInstrucao == "I_lo" || instrucaoJ.tipoInstrucao == "S" || instrucaoJ.tipoInstrucao == "B") {
         if (instrucaoOrigem.rd == instrucaoJ.rs1) {
@@ -192,10 +212,7 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards, b
             // Ignora iteração j caso passe da quantidade de instruções
             if (j > instrucoes.size() - 1) continue;
 
-            if (verificarHazardInstrucao(
-                instrucoes[hazards[i]],
-                instrucoes[j]
-            )) {
+            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[j], forwardingImplementado)) {
                 for (int k = 0; k < quantNOPs; k++) {
                     instrucoes.insert(instrucoes.begin() + hazards[i] + 1, noOperator);
                 }
@@ -233,14 +250,14 @@ vector<int> verificarHazards(vector<LinhaASM> instrucoes, bool forwardingImpleme
             // Ignora segunda iteração caso forwarding esteja implementado
             if (j == i + 2 && forwardingImplementado) continue;
 
-            //cout << "Verificando " << j + 1 << " de origem " << i + 1 << endl;
-            //cout << "Tipos: \nJ: " + instrucoes[j].tipoInstrucao << "\nI: " << instrucoes[i].tipoInstrucao << "\nRD do I: " << instrucoes[i].rd << "\nRS1 e RS2 do J: " << instrucoes[j].rs1 << " | " << instrucoes[j].rs2 << endl;
-            if (verificarHazardInstrucao(instrucoes[i], instrucoes[j])) {
+            if (verificarHazardInstrucao(instrucoes[i], instrucoes[j], forwardingImplementado)) {
                 cout << "| Hazard encontrada na linha " << j + 1 << " vindo da linha nao-finalizada " << i + 1 << endl;
                 falhas.push_back(i);
             }
         }
     }
+
+    if (falhas.size() == 0) cout << "Nenhum hazard com encontrado" << endl;
     cout << "Verificacao de hazards concluido com exito" << endl;
     return falhas;
 }
@@ -298,11 +315,6 @@ Organizacao criarOrganizacao(string nome) {
     cout << "Forneca o tempo de clock da organizacao " << nome << ": ";
     cin >> resultado.TClock;
     resultado.freqClock = (1 / resultado.TClock);
-
-    for (auto const& [key, value] : resultado.quantCiclos) {
-        cout << "Forneca a quantidade de ciclos para instrucoes tipo " << key << ": ";
-        cin >> resultado.quantCiclos[key];
-    }
     cout << "----------------------" << endl << endl;
     return resultado;
 }
@@ -349,6 +361,7 @@ void solucao(int tecnica, string nomeFornecido) {
         instrucoes = inserirNOPs(instrucoes, falhas, false);
         VisualizarInstrucoes(instrucoes);
         verificarHazards(instrucoes, false);
+        salvarPrograma(instrucoes, "Solucao1_NOP-NoForward.txt");
     }
     else if (tecnica == 2) {
         ifstream programa;
@@ -359,6 +372,7 @@ void solucao(int tecnica, string nomeFornecido) {
         instrucoes = inserirNOPs(instrucoes, falhas, true);
         VisualizarInstrucoes(instrucoes);
         verificarHazards(instrucoes, true);
+        salvarPrograma(instrucoes, "Solucao2_NOP-Forward.txt");
     }
     /*
     else if (tecnica = 3) {
