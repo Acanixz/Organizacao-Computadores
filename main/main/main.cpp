@@ -109,6 +109,7 @@ struct Resultados {
     float CiclosTotais; // Ciclos totais gastos
     float CPI; // Ciclos por instrução
     float TExec; // Tempo de execução da CPU (Quant. instrucoes * CPI * Clock)
+    double desempenho; // Float de desempenho (1.0 / TExec)
 };
 
 // Abre o arquivo, redundante, mas quem sabe
@@ -331,36 +332,18 @@ Organizacao criarOrganizacao(string nome) {
 Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao) {
     Resultados resultado{};
 
-    std::map<std::string, float> somaCiclos = {
-        {"U", 0.f},
-        {"J", 0.f},
-        {"B", 0.f},
-        {"I_ar", 0.f},
-        {"I_lo", 0.f},
-        {"R", 0.f},
-        {"S", 0.f},
-        {"?", 0.f}
-    };
-
     for (int i = 0; i < programa.size(); i++) {
-        somaCiclos[programa[i].tipoInstrucao] += 1;
-        resultado.CiclosTotais += organizacao.quantCiclos[programa[i].tipoInstrucao];
+        resultado.CiclosTotais += (i == 0 ? 5 : 1);
     }
 
-    /*
-    * Debug das buscas por cada tipo
-    for (auto const& [key, value] : somaCiclos) {
-        cout << key << ": " << value << endl;
-    }
-    */
-
-    resultado.CPI = (resultado.CiclosTotais / programa.size());
-    //resultado.TExec = TExecCPUPorFreqClock(programa.size(), resultado.CPI, organizacao.freqClock);
+    resultado.CPI = gerarCPI(resultado.CiclosTotais, programa.size());
+    resultado.TExec = TExecCPUPorTempoClock(programa.size(), resultado.CPI, organizacao.TClock);
+    resultado.desempenho = gerarDesempenho(resultado.TExec);
     return resultado;
 }
 
 
-void solucao(int tecnica, string nomeFornecido) {
+vector<LinhaASM> solucao(int tecnica, string nomeFornecido) {
     cout << endl << endl << endl;
     cout << "Executando solucao " << tecnica << endl;
     ifstream programa;
@@ -389,13 +372,15 @@ void solucao(int tecnica, string nomeFornecido) {
 
         default:
             cout << "[AVISO] Solucao " << tecnica << " nao implementada!" << endl;
-            return;
+            vector<LinhaASM> respostaVazia;
+            return respostaVazia;
     }
 
     cout << "Instrucoes com a solucao " << tecnica << ":" << endl;
     VisualizarInstrucoes(instrucoes);
     cout << "Verificacao de hazards pos-modificacao:" << endl;
     verificarHazards(instrucoes, forwardingImplementado);
+    return instrucoes;
 }
 
 int main() {
@@ -433,12 +418,18 @@ int main() {
             }
         } while (tecnica < 1 || tecnica > 5);
 
-        if (tecnica != 5) {
-            solucao(tecnica, nomeFornecido);
-        }
-        else {
-            for (int i = 1; i <= 4; i++) {
-                solucao(i, nomeFornecido);
+        for (int i = 1; i <= 4; i++) {
+            if (tecnica != 5 && i != tecnica) continue;
+            vector<LinhaASM> instrucaoResolvida = solucao(i, nomeFornecido);
+            if (!instrucaoResolvida.empty()) {
+                cout << endl;
+                cout << "Resultados da solucao " << i << ":" << endl;
+                Resultados resultado = calcularResultados(instrucaoResolvida, orgA);
+                cout << "Total de ciclos: " << resultado.CiclosTotais << endl;
+                cout << "CPI (Ciclos por Instrucao): " << resultado.CPI << endl;
+                cout << "Tempo de execucao: " << resultado.TExec << endl;
+                cout << "Desempenho: " << resultado.desempenho << endl;
+                contarNOPs(instrucaoResolvida);
             }
         }
         
