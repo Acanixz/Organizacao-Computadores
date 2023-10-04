@@ -217,9 +217,7 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards, b
         // Quantidade de NOPs a serem adicionados, 2 se não tiver forwarding, 1 se tiver
         int quantNOPs = forwardingImplementado ? 1 : 2;
 
-        // TODO: FOR DE J SÓ VAI ATÉ 1 SE TIVER FORWARDING IMPLEMENTADO
-
-        for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
+        for (int j = hazards[i] + 1; j <= hazards[i] + (forwardingImplementado ? 1 : 2); j++) {
             // Ignora iteração j caso passe da quantidade de instruções
             if (j > instrucoes.size() - 1) continue;
 
