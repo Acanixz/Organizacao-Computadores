@@ -44,7 +44,6 @@ struct LinhaASM {
 // (além de poder destacar NOPs se preferido)
 void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = true) {
     cout << "----------------------" << endl;
-    cout << "VISUALIZANDO PROGRAMA:" << endl;
 
     for (int i = 0; i < programa.size(); i++) {
         cout << (i + 1) << ": " << programa[i].instrucao;
@@ -57,6 +56,16 @@ void VisualizarInstrucoes(vector<LinhaASM> programa, bool destacarNOPs = true) {
     }
 
     cout << "----------------------" << endl;
+}
+
+void contarNOPs(vector<LinhaASM> programa) {
+    int NOPs = 0;
+    for (int i = 0; i < programa.size(); i++) {
+        if (programa[i].isManualNOP) {
+            NOPs++;
+        }
+    }
+    cout << "TOTAL DE NOPs inseridos: " << NOPs << endl;
 }
 
 void salvarPrograma(vector<LinhaASM> programa, string nomePrograma) {
@@ -208,6 +217,8 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards, b
         // Quantidade de NOPs a serem adicionados, 2 se não tiver forwarding, 1 se tiver
         int quantNOPs = forwardingImplementado ? 1 : 2;
 
+        // TODO: FOR DE J SÓ VAI ATÉ 1 SE TIVER FORWARDING IMPLEMENTADO
+
         for (int j = hazards[i] + 1; j <= hazards[i] + 2; j++) {
             // Ignora iteração j caso passe da quantidade de instruções
             if (j > instrucoes.size() - 1) continue;
@@ -346,44 +357,47 @@ Resultados calcularResultados(vector<LinhaASM> programa, Organizacao organizacao
     */
 
     resultado.CPI = (resultado.CiclosTotais / programa.size());
-    resultado.TExec = TExecCPUPorFreqClock(programa.size(), resultado.CPI, organizacao.freqClock);
+    //resultado.TExec = TExecCPUPorFreqClock(programa.size(), resultado.CPI, organizacao.freqClock);
     return resultado;
 }
 
 
 void solucao(int tecnica, string nomeFornecido) {
-    if (tecnica == 1) {
-        ifstream programa;
-        abrirArquivo(programa, nomeFornecido);
-        vector<LinhaASM> instrucoes = lerArquivo(programa);
-        VisualizarInstrucoes(instrucoes);
-        vector<int> falhas = verificarHazards(instrucoes, false);
-        instrucoes = inserirNOPs(instrucoes, falhas, false);
-        VisualizarInstrucoes(instrucoes);
-        verificarHazards(instrucoes, false);
-        salvarPrograma(instrucoes, "Solucao1_NOP-NoForward.txt");
+    cout << endl << endl << endl;
+    cout << "Executando solucao " << tecnica << endl;
+    ifstream programa;
+    abrirArquivo(programa, nomeFornecido);
+    vector<LinhaASM> instrucoes = lerArquivo(programa);
+    cout << "Instrucoes originais: " << endl;
+    VisualizarInstrucoes(instrucoes);
+    vector<int> falhas;
+    bool forwardingImplementado;
+
+    switch (tecnica)
+    {
+        case 1:
+            forwardingImplementado = false;
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = inserirNOPs(instrucoes, falhas, forwardingImplementado);
+            salvarPrograma(instrucoes, "Solucao1_NOP-NoForward.txt");
+            break;
+
+        case 2:
+            forwardingImplementado = true;
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = inserirNOPs(instrucoes, falhas, forwardingImplementado);
+            salvarPrograma(instrucoes, "Solucao2_NOP-Forward.txt");
+            break;
+
+        default:
+            cout << "[AVISO] Solucao " << tecnica << " nao implementada!" << endl;
+            return;
     }
-    else if (tecnica == 2) {
-        ifstream programa;
-        abrirArquivo(programa, nomeFornecido);
-        vector<LinhaASM> instrucoes = lerArquivo(programa);
-        VisualizarInstrucoes(instrucoes);
-        vector<int> falhas = verificarHazards(instrucoes, true);
-        instrucoes = inserirNOPs(instrucoes, falhas, true);
-        VisualizarInstrucoes(instrucoes);
-        verificarHazards(instrucoes, true);
-        salvarPrograma(instrucoes, "Solucao2_NOP-Forward.txt");
-    }
-    /*
-    else if (tecnica = 3) {
-        cout << "Tecnica ainda nao implementada!" << endl;
-        cin >> tecnica;
-    }
-    else if (tecnica = 4) {
-        cout << "Tecnica ainda nao implementada!" << endl;
-        cin >> tecnica;
-    }
-     */
+
+    cout << "Instrucoes com a solucao " << tecnica << ":" << endl;
+    VisualizarInstrucoes(instrucoes);
+    cout << "Verificacao de hazards pos-modificacao:" << endl;
+    verificarHazards(instrucoes, forwardingImplementado);
 }
 
 int main() {
@@ -405,30 +419,31 @@ int main() {
         cout << "Forneca o nome/caminho do arquivo contendo as instrucoes: " << endl;
         cin >> nomeFornecido;
         cout << endl << endl;
-
         int tecnica = 0;
-        cout << "Escolha a tecnica:" << endl;
-        cout << "1- Sem solucao em hardware, insercao de NOPs" << endl;
-        cout << "2- Forwarding, insercao de NOPs" << endl;
-        cout << "3- Sem solucao em hardware, reordenamento, insercao de NOPs" << endl;
-        cout << "4- Forwarding. reordenamento, insercao de NOPs" << endl;
-        while (tecnica < 1 || tecnica > 4) {
-            cout << "Opcao escolhida: ";
+
+        do {
+            cout << "Escolha a tecnica:" << endl;
+            cout << "1 - Sem solucao em hardware, insercao de NOPs" << endl;
+            cout << "2 - Forwarding, insercao de NOPs" << endl;
+            cout << "3 - Sem solucao em hardware, reordenamento, insercao de NOPs" << endl;
+            cout << "4 - Forwarding. reordenamento, insercao de NOPs" << endl;
+            cout << "5 - Todas as opcoes acima" << endl;
             cin >> tecnica;
 
-
-            if (tecnica < 1 || tecnica > 4){
+            if (tecnica < 1 || tecnica > 5) {
                 cout << "Opcao invalida, tente novamente!" << endl;
             }
-            else if (tecnica == 3) {
-                cout << "Tecnica ainda nao implementada!" << endl;
-            }
-            else if (tecnica == 4) {
-                cout << "Tecnica ainda nao implementada!" << endl;
+        } while (tecnica < 1 || tecnica > 5);
+
+        if (tecnica != 5) {
+            solucao(tecnica, nomeFornecido);
+        }
+        else {
+            for (int i = 1; i <= 4; i++) {
+                solucao(i, nomeFornecido);
             }
         }
-           
-        solucao(tecnica, nomeFornecido);
+        
 
 
         /*
