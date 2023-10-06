@@ -234,6 +234,59 @@ vector<LinhaASM> inserirNOPs(vector<LinhaASM> instrucoes, vector<int> hazards, b
     return inserirNOPsEmJump(instrucoes);
 }
 
+vector<LinhaASM> aplicarReordenacao(vector<LinhaASM> instrucoes, vector<int> hazards, bool forwardingImplementado) {
+    // Passa por todas as hazards
+    for (int i = 0; i < hazards.size(); i++) {
+        LinhaASM instrucaoEscolhida;
+        bool instrucaoEscolhidaDefinida = false;
+        int indiceInstrucaoEscolhida = 0;
+
+        // Passa por todas as instruções abaixo da linha da hazard
+        for (int j = i+1; j < instrucoes.size(); j++) {
+
+            // Validação da linha p/ entrar em hazard+1 //
+
+            // Passa linha j se ela conflita com a linha da hazard
+            if (verificarHazardInstrucao(instrucoes[hazards[i]], instrucoes[j], forwardingImplementado)) continue;
+
+            // Passa linha j se não tiver forwarding e ela conflitar com hazard-1
+            if (!forwardingImplementado && i > 0){
+                if (verificarHazardInstrucao(instrucoes[hazards[i] - 1], instrucoes[j], forwardingImplementado)) continue;
+            }
+
+            bool linhaValidaDepois = true;
+            // Passa linha j se as linhas após a hazard não terão conflito com a linha j
+            for (int k = hazards[i] + 1; k <= hazards[i] + (forwardingImplementado ? 1 : 2); k++) {
+                // Evita k de atravessar o tamanho maximo do vetor
+                if (k > instrucoes.size() - 1) continue;
+                if (verificarHazardInstrucao(instrucoes[k], instrucoes[j], forwardingImplementado)) linhaValidaDepois = false;
+            }
+
+            // Validação da linha ao sair de seu ponto de origem //
+
+            bool linhaValidaAntes = true;
+            // Passa linha j se a linha j-1 não tiver conflito com as proximas linhas caso a linha j seja removida
+            for (int k = j + 1; k <= j + (forwardingImplementado ? 1 : 2); k++) {
+                // Evita k de atravessar o tamanho maximo do vetor
+                if (k > instrucoes.size() - 1) continue;
+                if (verificarHazardInstrucao(instrucoes[j - 1], instrucoes[k], forwardingImplementado)) linhaValidaAntes = false;
+            }
+
+            if (linhaValidaAntes && linhaValidaDepois) {
+                instrucaoEscolhida = instrucoes[j];
+                instrucaoEscolhidaDefinida = true;
+                indiceInstrucaoEscolhida = j;
+            }
+        }
+
+        // Há uma instrução que pode ser reordenada
+        if (instrucaoEscolhidaDefinida) {
+            instrucoes.insert(instrucoes.begin() + hazards[i] + 1, instrucaoEscolhida);
+            instrucoes.erase(instrucoes.begin() + indiceInstrucaoEscolhida + 1);
+        }
+    }
+    return instrucoes;
+}
 
 
 // Verifica o vetor de instruções assembly por
@@ -368,6 +421,24 @@ vector<LinhaASM> solucao(int tecnica, string nomeFornecido) {
             falhas = verificarHazards(instrucoes, forwardingImplementado);
             instrucoes = inserirNOPs(instrucoes, falhas, forwardingImplementado);
             salvarPrograma(instrucoes, "Solucao2_NOP-Forward.txt");
+            break;
+
+        case 3: // sem hardware, reordenamento, nops
+            forwardingImplementado = false;
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = aplicarReordenacao(instrucoes, falhas, forwardingImplementado);
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = inserirNOPs(instrucoes, falhas, forwardingImplementado);
+            salvarPrograma(instrucoes, "Solucao3_Reordenamento-NOP-NoForward.txt");
+            break;
+
+        case 4: // forwarding, reordenamento, nops
+            forwardingImplementado = true;
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = aplicarReordenacao(instrucoes, falhas, forwardingImplementado);
+            falhas = verificarHazards(instrucoes, forwardingImplementado);
+            instrucoes = inserirNOPs(instrucoes, falhas, forwardingImplementado);
+            salvarPrograma(instrucoes, "Solucao4_Reordenamento-NOP-Forward.txt");
             break;
 
         default:
