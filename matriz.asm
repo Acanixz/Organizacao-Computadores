@@ -5,59 +5,63 @@
 	tab: .asciz "\t"
 	
 .text
-jal zero, main
+jal	zero, main
 
 imprime_matriz:
-	add t6, zero, a0
+	add	t6, zero, a0 # t6 = ordem da matriz (fornecido pelo usu√°rio)
 	for_i:
-		beq t0, t6, fim_i
-		add t1, zero, zero #j=0
+		beq	t0, t6, fim_i # t0 = iterador i, if t0 == 6: GOTO fim_i
+		add	t1, zero, zero # t1 = iterador j (0)
 		for_j:
-			beq t1, t6, fim_j
-			#calculo da posiÁ„o da matriz
-			mul t2, t0, t6 #t2 = linha*ordem 
-			slli t2, t2, 2 # 4*t2
-			slli t3, t1, 2 # 4*j
-			add t4, t2, t3  
-			add t5, t4, a1 #m[t2][t3]
-			lw a0, 0(t5)   #a0 = m[t2][t3]
+			beq	t1, t6, fim_j # if j == t6: GOTO fim_j
+			#calculo da posi√ß√£o da matriz
+			mul	t2, t0, t6 #t2 = i * ordem 
+			slli	t2, t2, 2 # t2 *= 4*
+			slli	t3, t1, 2 # t3 = j * 4
+			add	t4, t2, t3 # t4 = t2 + t3
+			add	t5, t4, a1 # m[t2][t3]
+			lw	a0, 0(t5)   #a0 = m[t2][t3]
 			
 			#imprime
-			addi a7, zero, 1
+			addi	a7, zero, 1
 			ecall
-			#imprime tabulaÁ„o
-			addi a7, zero, 4
-			la a0, tab
+			#imprime tabula√ß√£o
+			addi	a7, zero, 4
+			la	a0, tab
 			ecall
 		
-			addi t1, t1, 1 #j++
-			jal zero, for_j
+			addi	t1, t1, 1 # j++
+			jal	zero, for_j
 		fim_j:
 		#imprime pula linha
-		addi a7, zero, 4
-		la a0, linha
+		addi	a7, zero, 4
+		la	a0, linha
 		ecall
 		
-		addi t0, t0, 1 #i++
-		jal zero, for_i
+		addi	t0, t0, 1 # i++
+		jal	zero, for_i
 	fim_i:
-	jalr ra, zero, 0
+	j	end
 	
 main:
 	#Imprime string
-	addi a7, zero, 4
-	la a0, solicita
+	addi	a7, zero, 4
+	la	a0, solicita
 	ecall
 	
 	#Le inteiro
-	addi a7, zero, 5
+	addi	a7, zero, 5
 	ecall
 	
-	#a0, contÈm a ordem da matriz
-	la a1, matriz
-	jal ra, imprime_matriz
+	#a0, cont√©m a ordem da matriz
+	la	a1, matriz
+	jal	ra, imprime_matriz
 	
 	
 	#Finaliza programa
+	addi	a7, zero, 10
+	ecall
+
+end:
 	addi a7, zero, 10
 	ecall
