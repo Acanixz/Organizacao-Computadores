@@ -10,7 +10,7 @@ jal	zero, main
 imprime_matriz:
 	add	t6, zero, a0 # t6 = ordem da matriz (fornecido pelo usuário)
 	for_i:
-		beq	t0, t6, fim_i # t0 = iterador i, if t0 == 6: GOTO fim_i
+		beq	t0, t6, fim_i # t0 = iterador i, if t0 == t6: GOTO fim_i
 		add	t1, zero, zero # t1 = iterador j (0)
 		for_j:
 			beq	t1, t6, fim_j # if j == t6: GOTO fim_j
