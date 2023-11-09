@@ -8,14 +8,14 @@
 jal	zero, main
 
 imprime_matriz:
-	add	t6, zero, a0 # t6 = ordem da matriz (fornecido pelo usu√°rio)
+	add	t6, zero, a0 # t6 = ordem da matriz (fornecido pelo usu·rio)
 	for_j:
 		beq	t0, t6, fim_j # t0 = iterador j, j == t6: GOTO fim_j
 		add	t1, zero, zero # t1 = iterador i (0)
 		for_i:
 			beq	t1, t6, fim_i # i == 56: GOTO fim_i
 			
-			# calculo da posi√ß√£o da matriz
+			# calculo da posiÁ„o da matriz
 			mul	t2, t1, t6 # t2 = i * ordem
 			slli	t2, t2, 2 # t2 *= 4
 			slli	t3, t0, 2 # t3 = j * 4
@@ -26,7 +26,7 @@ imprime_matriz:
 			#imprime
 			addi	a7, zero, 1
 			ecall
-			#imprime tabula√ß√£o
+			#imprime tabulaÁ„o
 			addi	a7, zero, 4
 			la	a0, tab
 			ecall
@@ -34,7 +34,7 @@ imprime_matriz:
 			addi	t1, t1, 1 # i++
 			jal	zero, for_i
 	fim_j:
-		j end
+		jalr zero, ra, 0
 	fim_i:
 		#imprime pula linha
 		addi	a7, zero, 4
@@ -53,15 +53,11 @@ main:
 	addi	a7, zero, 5
 	ecall
 	
-	#a0, cont√©m a ordem da matriz
+	#a0, contÈm a ordem da matriz
 	la	a1, matriz
 	jal	ra, imprime_matriz
 	
 	
 	#Finaliza programa
 	addi	a7, zero, 10
-	ecall
-
-end:
-	addi a7, zero, 10
 	ecall
