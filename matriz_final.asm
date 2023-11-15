@@ -105,11 +105,9 @@ somar_IJ:
 							
 							# t0 = iterador i
 							# t1 = iterador j
-							# t2 = iterador i (posição de memoria)
-							# t3 = iterador j (posição de memoria)
+							# t2 = resultado iterador i
+							# t3 = resultado iterador j
 							# t4 = i+j (posição de memoria alvo)
-							# t5 = matriz_A[i][j]
-							# t6 = matriz_B[i][j]
 							
 							# Durante operação de soma:
 							# t2 = valor de matriz_A[i][j]
@@ -129,17 +127,17 @@ somar_IJ:
 			
 							# Calculo de posição das matrizes
 			slli	t2, t0, 2		# t2 = iterador i * 4
-			slli	t3, t1, 2		# t3 = iterador j * 4
 			mul	t2, t2, a1		# t2 = (i*4*)ordem
+			slli	t3, t1, 2		# t3 = iterador j * 4
 			add	t4, t2, t3		# t4 = i + j
 			
 							# Obtenção das matrizes (endereço)
-			add	t5, a2, t4		# t5 = matriz_A(base) + (i+j) [mem. alvo]
-			add	t6, a3, t4		# t6 = matriz_B(base) + (i+j) [mem. alvo]
+			add	t2, a2, t4		# t2 = matriz_A(base) + (i+j) [mem. alvo]
+			add	t3, a3, t4		# t3 = matriz_B(base) + (i+j) [mem. alvo]
 			
 							# Carregamento dos valores e soma
-			lw	t2, 0(t5)   		# t2 = valor de matriz_A[i][j]
-			lw	t3, 0(t6)   		# t3 = valor de matriz_B[i][j]
+			lw	t2, 0(t2)   		# t2 = valor de matriz_A[i][j]
+			lw	t3, 0(t3)   		# t3 = valor de matriz_B[i][j]
 			add	a0, t2, t3		# a0 = t2 + t3
 			
 							# Salvamento dos dados e imprime
@@ -175,11 +173,9 @@ somar_JI:
 							
 							# t0 = iterador i
 							# t1 = iterador j
-							# t2 = iterador i (posição de memoria)
-							# t3 = iterador j (posição de memoria)
+							# t2 = resultado iterador i
+							# t3 = resultado iterador j
 							# t4 = i+j (posição de memoria alvo)
-							# t5 = matriz_A[j][i]
-							# t6 = matriz_B[j][i]
 							
 							# Durante operação de soma:
 							# t2 = valor de matriz_A[j][i]
@@ -197,18 +193,18 @@ somar_JI:
 			beq	t0, a1, fim_i_1	# if iterador i == ordem: jump fim_i_1
 			
 							# Calculo de posição das matrizes
-			slli	t2, t0, 2		# t2 = iterador i * 4
 			slli	t3, t1, 2		# t3 = iterador j * 4
-			mul	t3, t3, a1		# t3 = (j*4*)ordem
+			slli	t2, t0, 2		# t2 = iterador i * 4
+			mul	t2, t2, a1		# t2 = (i*4*)ordem
 			add	t4, t2, t3		# t4 = i + j
 			
 							# Obtenção das matrizes (endereço)
-			add	t5, a2, t4		# t5 = matriz_A(base) + (i+j) [mem. alvo]
-			add	t6, a3, t4		# t6 = matriz_B(base) + (i+j) [mem. alvo]
+			add	t2, a2, t4		# t2 = matriz_A(base) + (i+j) [mem. alvo]
+			add	t3, a3, t4		# t3 = matriz_B(base) + (i+j) [mem. alvo]
 			
 							# Carregamento dos valores e soma
-			lw	t2, 0(t5)   		# t2 = valor de matriz_A[i][j]
-			lw	t3, 0(t6)   		# t3 = valor de matriz_B[i][j]
+			lw	t2, 0(t2)   		# t2 = valor de matriz_A[j][i]
+			lw	t3, 0(t3)   		# t3 = valor de matriz_B[j][i]
 			add	a0, t2, t3		# a0 = t2 + t3
 			
 							# Salvamento dos dados e imprime
