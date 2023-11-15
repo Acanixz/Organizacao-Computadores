@@ -188,14 +188,13 @@ somar_JI:
 							# a0 = matriz_A[j][i] + matriz_B[j][i]
 							
 							# OBS: label do for loop usa sufixo _1
-							
 	add	t0, zero, zero				# Reset iterador i
 	add	t1, zero, zero				# Reset iterador j
-	for_i_1:
-		add	t1, zero, zero			# Reset iterador j
-		beq	t0, a1, fim_i_1			# if iterador i == ordem: jump fim_i_1
-		for_j_1:
-			beq	t1, a1, fim_j_1		# if iterador j == ordem: jump fim_j_1
+	for_j_1:
+		add	t0, zero, zero			# Reset iterador i
+		beq	t1, a1, fim_j_1			# if iterador j == ordem: jump fim_j_1
+		for_i_1:
+			beq	t0, a1, fim_i_1	# if iterador i == ordem: jump fim_i_1
 			
 							# Calculo de posição das matrizes
 			slli	t2, t0, 2		# t2 = iterador i * 4
@@ -221,19 +220,20 @@ somar_JI:
 			la	a0, tab
 			ecall				# Imprime tabulação
 			
-							# Completa iteração j
-			addi	t1, t1, 1		# j++
-			jal	zero, for_j_1		# Volta para o começo do for j
-fim_i_1:
+							# Completa iteração i
+			addi	t0, t0, 1		# i++
+			jal	zero, for_i_1		# Volta para o começo do for i
+
+fim_j_1:
 	j end
 	
-fim_j_1:
+fim_i_1:
 	addi	a7, zero, 4
 	la	a0, linha
 	ecall						# Imprime \n
 	
-	addi	t0, t0, 1				# i++
-	jal	zero, for_i_1				# Volta para o começo do for i
+	addi	t1, t1, 1				# j++
+	jal	zero, for_j_1				# Volta para o começo do for j
 
 #	*************************************************************************
 
